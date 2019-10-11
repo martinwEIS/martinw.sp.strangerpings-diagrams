@@ -1,0 +1,280 @@
+' 
+' reference       : http://plantuml.com/state-diagram
+' skinparam       : http://plantuml.com/skinparam
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+hide empty description
+'scale 900 width
+'scale max 1024 width
+
+'---- Title Format Settings ----
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+'---- Object Format Settings ----
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BorderColor Gray
+  BackgroundColor<<cdf_bkgd>> YellowGreen/White
+  BackgroundColor<<bootstrap_bkgd>> darkorange
+  BackgroundColor<<heat_bkgd>> #Red/Yellow
+  BackgroundColor<<jenkins_file>> LightSteelBlue
+  BackgroundColor<<manifest_bkgd>> #CadetBlue/White
+  BackgroundColor<<telemetry_bkgd>> #Gray/White
+  BackgroundColor<<pyorc_bkgd>> #SteelBlue/White
+  'FontName Aapex 
+
+}
+
+title State Diagram:On-Prem MAI & PyOrc
+
+state cdf {
+
+    state cdf_pipeline <<cdf_bkgd>> {
+        cdf_pipeline : REPO = STASH 
+        state cdfdeploy <<cdf_bkgd>> {
+        state getBootstrapLibrary <<bootstrap_bkgd>>
+            state deploymentPriority <<cdf_bkgd>>{
+                deploymentPriority: 1. Get environmentmanifest repo
+                deploymentPriority: 2. Loop thru envIdList
+                deploymentPriority: 3. StageName = "Deploy, Validate, Promote"
+
+                state "cdfDeploySingle" as cdfDS <<cdf_bkgd>>
+                
+                } 
+                '----- NOTES MAPPINGS -----
+                note as cdfsingle_note
+                    <b>cdfDeploySingle (Ring-down):</b>
+                    # <b><u> context #2: "bootstrap" </u></b>
+                    ## step: bootstrap
+                    # <b><u> context #3: "deploy" </u></b>
+                    ## step: deploy
+                    ## step: deploy-prune
+                    ## step: deploy-converge
+                    ## step: validation
+                    ### <b><u> withTelemetry </u></b>               
+                end note     
+                
+                cdfDS -> cdfsingle_note
+            }
+
+       '----- NOTES MAPPINGS -----   
+       [*] --> cdfdeploy      
+            note as cdfdeploy_note
+                START: cdfdeploy
+                cdfdeploy.groovy executed
+            end note 
+       [*] -> cdfdeploy_note
+        
+        '----- OBJECT MAPPINGS ------ 
+        cdfdeploy --> getBootstrapLibrary
+        getBootstrapLibrary --> deploymentPriority
+
+    }
+
+    state ci_pipeline {
+        ci_pipeline: repo : STASH
+        state withPyorc <<pyorc_bkgd>>
+            withPyorc: # cdf_docker
+            withPyorc: # pycdf : "adapt-py-release"
+            withPyorc: # dockerImage.inside
+        
+        state ciDefaults {
+            state getDockerRegistry <<pyorc_bkgd>>
+            state getSystemOwnerFlow <<telemetry_bkgd>>
+        }
+
+        state withTelemetry<<telemetry_bkgd>>
+
+        '----- OBJECT MAPPINGS ------ 
+        withPyorc --> getDockerRegistry
+        getDockerRegistry --> docker_registry
+        withTelemetry --> getSystemOwnerFlow
+        cdfDS --> withTelemetry
+
+    }
+
+    state bootstrapApplication <<bootstrap_bkgd>>
+        bootstrapApplication : STASH: \n - applicationbootstrap
+
+    state PyOrc {
+        state PyOrc <<pyorc_bkgd>>
+            PyOrc : onprem-af-pyorc (GitHub)
+        state "heat-stack-prune" as heat_sp <<heat_bkgd>> 
+        state "heat-stack-create" as heat_sc <<heat_bkgd>>
+            heat_sc : # _create_stack()
+            heat_sc : # Get Environment_parameters: <b>unmunchify(environment_parameters)</b>
+            heat_sc : # Get Template_name: <b>get_resource_registry(template_name)</b>
+            heat_sc : <b><u>\tMAI Entry Point:</u></b>
+            heat_sc : \ta. <b><u>get_resource_registry(template_name)</u></b>
+            heat_sc : \tb. <b><u>user_data.yaml</u></b> (pyorc/templates/common)
+            heat_sc : \t\t 1. <b><u>_download_mai(zip_location)</u></b> (line 86)
+            heat_sc : \t\t 2. call(["c:\\python27\\python.exe", "c:/mai/api/action/<u><b>CONSTRUCT.PY</b></u>"])  (line #106)
+            heat_sc : # <b> Get Template_file </b> : template_file (pyorc\templates)
+            heat_sc : \ta. <b> avi_deployment </b> OR <b> vm_deployment </b>
+            heat_sc : # <b> get_cloud().create_stack() </b> : (shade 'openstack_cloud()' pyorc\utils\shade_utils.py)
+        state "wait-for-converge" as heat_wfc <<heat_bkgd>>
+        state "avi-promote-to-test" as heat_avipro <<heat_bkgd>> 
+        state fork_state <<fork>>
+
+        '----- OBJECT MAPPINGS ------ 
+        withPyorc --> heat_sp : <b> STEP #1: "deploy-prune" </b>
+        withPyorc --> fork_state : <b> STEP #2: "deploy-converge" </b>
+            fork_state --> heat_sc : <b> (2A)</b>
+            fork_state --> heat_wfc : <b> (2B)</b>
+            fork_state --> heat_avipro :<b>  (2C)</b>
+        
+    }
+
+    state MAI <<pyorc_bkgd>> {
+        MAI : onprem-af-mai (GitHub)
+        state construct.py  #GoldenRod/White : # Called by PyOrc
+            construct.py: (mailib\pycdf\api\action\<b><u>construct.py</u></b>)
+        '----- OBJECT MAPPINGS ------ 
+        heat_sc --> construct.py    
+    }
+
+    state Stash {
+        state "cdf_docker" as cdfdock_stash <<pyorc_bkgd>>
+        state "environmentmanifest" as envman_stash <<manifest_bkgd>>
+        '----- OBJECT MAPPINGS ------ 
+        withPyorc --> cdfdock_stash
+        envman_stash --> deploymentPriority
+    }
+
+    state artifactory {
+        state pycdf <<pyorc_bkgd>> {
+            pycdf : "adapt-py-release"
+        }
+        '----- OBJECT MAPPINGS ------ 
+        withPyorc -up-> pycdf
+    }
+
+    state docker_registry{
+        state "af-docker.epnet.com" <<pyorc_bkgd>>
+
+    }
+
+    state plumber <<telemetry_bkgd>> {
+        state "af-plumber" as afp <<telemetry_bkgd>>
+        afp : http://af-plumber.epnet.com/api/event
+
+        '----- OBJECT MAPPINGS ------ 
+        withTelemetry -> afp
+
+    }
+
+    state flowdock <<telemetry_bkgd>> { 
+        flowdock: flow: ciDefaults.getSystemOwnerFlow() 
+
+        '----- OBJECT MAPPINGS ------ 
+        withTelemetry --> flowdock  
+
+    }
+ 
+    '----- OBJECT MAPPINGS ------ 
+    getBootstrapLibrary --> bootstrapApplication : <b>context #1: "getBootstrapLibrary"</b>
+    cdfDS --> bootstrapApplication : <b> context #2: "bootstrap" </b>
+    cdfDS --> withPyorc : <b>context #3: "deploy"</b>
+
+}
+
+state AF_APPLICATION {
+    
+    state app_manifest <<manifest_bkgd>>
+        app_manifest : Parameters:
+        app_manifest : - {Application parameters}
+
+
+    state Inf_Manifest <<manifest_bkgd>>
+        Inf_Manifest : Parameters:
+        Inf_Manifest : - {Heat Template parameters}
+
+    state "jenkinsfile" as JF <<jenkins_file>>
+        JF: --> cdfDeploy
+        JF: defaultTestBlock: testBlock,
+        JF: preDeployBlock: preDeployBlock,
+        JF: assemblyLinePrefix: assemblyLinePrefix
+
+
+    '----- OBJECT MAPPINGS ------     
+    JF --> cdf_pipeline
+    JF --> Inf_Manifest
+    JF -> app_manifest
+
+    
+}
+    '----- NOTES MAPPINGS ----- 
+    note as N2
+        AF Directory Structure:
+        Test/
+        Orchestration/  <b>
+            -> <b>app_manifest.yaml </b>
+            -> <b>inf_manifest.yaml </b>
+        service.sln
+        service.csproj
+        project.build
+        <b>Jenkinsfile </b>
+    end note 
+
+    'AF_APPLICATION -down-> N2
+    N2 -up-> AF_APPLICATION
+
+[*] --> JF: ( #1. )
+   note as N1
+    START:
+    Pipeline executes Jenkinsfile
+    cdf_pipeline Library called
+    cdf_pipeline -> cdfDeploy
+   end note 
+
+
+[*] -> N1
+
+'----- OBJECT MAPPINGS ------ 
+heat_sc -> Inf_Manifest
+
+legend top right
+    <b><u>Color Code Ledgend</u></b>
+    * Teal  = Manifest Files
+    * Green = Cdf_Pipeline Library
+    * Orange = ApplicationBootStrap Library
+    * Blue  = PyOrc Library
+    * Red-Yellow = PyOrc Heat templates
+    * Gray = Ci_Pipelie (withTelemetry)
+endlegend
+
+note as activity_flow_note
+    <b><u>CDF Activity/Flow</u></b>
+    # AF Application Pipeline -> Jenkinsfile
+    # Jenkinsfile -> cdfDeploy
+    # <b><u>CdfDeploy</u></b>
+    ## <b>getBootstrapLibrary
+    ### <b><u> context #1: "getBootstrapLibrary" </u></b>
+    ### ApplicationBootStrap (STASH)
+    ## <b>deploymentPriority</b>
+    ### EnvironmentManifest (STASH)
+    #### Loop thru envIdList (stages : Deploy, Validate, Promote)
+    ### <b>cdfDeploySingle</b>
+    #### <b><u> context #2: "bootstrap" </u></b>
+    ##### step: bootstrap
+    #### <b><u> context #3: "deploy" </u></b>
+    ##### step: deploy
+    ##### step: deploy-prune
+    ##### step: deploy-converge
+    ##### step: validation
+    ###### <b><u> withTelemetry </u></b>
+    ### <b>setConsulKV</b>
+end note
+
+cdf -down-> activity_flow_note
+
+@enduml

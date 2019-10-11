@@ -1,0 +1,256 @@
+' 
+' reference       : http://plantuml.com/state-diagram
+' skinparam       : http://plantuml.com/skinparam
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+hide empty description
+'scale 900 width
+'scale max 1024 width
+
+'---- Title Format Settings ----
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+'---- Object Format Settings ----
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BorderColor Gray
+  BackgroundColor<<cdf_bkgd>> YellowGreen/White
+  BackgroundColor<<bootstrap_bkgd>> darkorange
+  BackgroundColor<<heat_bkgd>> #Red/Yellow
+  BackgroundColor<<jenkins_file>> LightSteelBlue
+  BackgroundColor<<manifest_bkgd>> #CadetBlue/White
+  BackgroundColor<<telemetry_bkgd>> #Gray/White
+  BackgroundColor<<pyorc_bkgd>> #SteelBlue/White
+  BackgroundColor<<vm_bkgd>> Yellow/White
+  BackgroundColor<<mai_inst_bkgd>> GoldenRod/White
+  BackgroundColor<<artifactory_bkgd>> Pink/White
+
+}
+
+title State Diagram:On-Prem MAI
+
+state cdf {
+
+    state cdf_pipeline <<cdf_bkgd>> {
+        cdf_pipeline : REPO = STASH 
+        state cdfdeploy <<cdf_bkgd>> {
+        state getBootstrapLibrary <<bootstrap_bkgd>>
+            state deploymentPriority <<cdf_bkgd>>{
+                deploymentPriority: 1. Checkout: environmentmanifest
+                deploymentPriority: \t a. Loop-thru-envIdList
+                
+                state "cdfDeploySingle" as cdfDS <<cdf_bkgd>>
+                    cdfDS : <b> Stage(s): "Deploy, Validate, Promote" </b>
+                } 
+                '----- NOTES MAPPINGS -----
+                note as cdfsingle_note
+                    <b>cdfDeploySingle (Ring-down):</b>
+                    # <b><u> context : "bootstrap" </u></b>
+                    ## step : bootstrap
+                    # <b><u> context : "deploy" </u></b>
+                    ## step : deploy
+                    ### step : deploy-prune
+                    #### heat-stack-prune
+                    ### step : deploy-converge
+                    #### <b>heat-stack-create  **(MAI Call)</b>
+                    #### wait-for-converge
+                    #### avi-promote-to-test
+                    ## step : validation
+                    #### testBlock
+                    #### heat-stack-prune
+                    ## step : promotion
+                    ### avi-canary-prepare
+                    ### avi_canary_step
+                    ### avi-canary-abort
+                    ### avi-promote-to-active              
+                end note  
+
+                note as getbsLib_note
+                    <b>getBootstrapLibrary:</b>
+                    # <b><u> Checkout: ApplicationBootStrap </u></b>
+                    ## (STASH) : ApplicationBootStrap
+                end note   
+                
+                getBootstrapLibrary  -> getbsLib_note
+                [*] --> getBootstrapLibrary 
+
+                '----- NOTES MAPPINGS -----   
+            
+                note as cdfdeploy_note
+                    START: cdfdeploy
+                    * (run: cdfdeploy.groovy)
+                end note 
+                [*] -> cdfdeploy_note
+            }
+        '----- OBJECT MAPPINGS ------ 
+        getBootstrapLibrary --> deploymentPriority
+
+    }
+
+    state ci_pipeline <<cdf_bkgd>> {
+        ci_pipeline: repo : STASH
+        state withPyorc <<pyorc_bkgd>>
+            withPyorc: # cdf_docker
+            withPyorc: # pycdf (adapt-py-release)
+        state withTelemetry<<telemetry_bkgd>>
+
+        cdfDS --> withTelemetry
+
+    }
+
+    state PyOrc {
+        state PyOrc <<pyorc_bkgd>>
+            PyOrc : onprem-af-pyorc (GitHub)
+        ' state "heat-stack-prune" as heat_sp <<heat_bkgd>> 
+        state "heat-stack-create" as heat_sc <<heat_bkgd>> 
+            heat_sc : <b> user_data.yaml </b>
+            heat_sc : # _download_mai(zip_location) 
+            heat_sc : # call(mai_install_cmd)
+            heat_sc : # construct.py         
+        ' state "wait-for-converge" as heat_wfc <<heat_bkgd>>
+        ' state "avi-promote-to-test" as heat_avipro <<heat_bkgd>> 
+        state fork_state <<fork>>
+
+        '----- OBJECT MAPPINGS ------ 
+        ' withPyorc --> heat_sp : <b> STEP: "deploy-prune" </b>
+        withPyorc -right-> fork_state : <b> STEP: "deploy-converge" </b>
+            fork_state -left-> heat_sc
+            ' fork_state --> heat_wfc : <b> (2B)</b>
+            ' fork_state --> heat_avipro :<b>  (2C)</b>
+        
+    }
+    note as heatstackcreate_note
+        <b> heat-stack-create (Ring-down): </b>
+        # _create_stack()
+        ## template_name: <b> avi_deployment </b> OR <b> vm_deployment </b> 
+        ## <b>get_resource_registry(Line 71)</b>
+        ### <b><u>user_data.yaml</u></b> (pyorc/templates/common)
+        #### (line 86): <b><u>_download_mai(zip_location)</u></b> (line 86)
+        ##### (artifactory/eis-int-all/CDF/components/mai/mai_latest.zip)
+        #### (line 100): <b><u>call(mai_install_cmd)</u></b>
+        ##### (c:/mai/bootstrap/windows/install.ps1)
+        #### (line 106) <b><u>construct.py"</u></b>
+        ##### (c:/mai/api/action/<u><b>construct.py)
+        ## <b> get_cloud().create_stack(template_file) </b>  **START
+        ### openstack_cloud() (pyorc\utils\shade_utils.py)  
+    end note 
+
+
+    heat_sc -down-> heatstackcreate_note
+    cdfDS -up-> withPyorc : <b>context: "deploy"</b>
+
+state artifactory <<artifactory_bkgd>> {
+
+    state mai_latest
+        mai_latest : (artifactory/eis-int-all/CDF/components/mai/latest/)
+        mai_latest : # mai_latest.zip
+    state python
+        python: (artifactory/eis-int-all/CDF/)
+        python: # python2_7
+        python: # pywin32
+
+    state pycdf {
+        pycdf : (artifactory/adapt-py-release/pycdf/)
+        pycdf : # pycdf-4.31.0
+    }
+
+    state winsw
+        winsw : (artifactory/eis-int-all/ADAPT/WinSW)
+        winsw : # winsw-1.18-bin.exe
+
+    state af_application
+        af_application : app_manifest.yaml
+
+    state "extensions" as artfct_ext
+        artfct_ext : (eis-int-all/CDF/components/extensions/)
+        artfct_ext : # consul_extensions
+        artfct_ext : # iis_extensions
+    '----- OBJECT MAPPINGS ------ 
+    
+}
+
+
+state VM_Deployment <<vm_bkgd>> {
+    state download_mai <<mai_inst_bkgd>>
+        download_mai: (mai_latest.zip)
+    state install_mai <<mai_inst_bkgd>> {
+        install_mai : (<b>c:/mai/bootstrap/windows/install.ps1</b>)
+        state "Install-Python.ps1" as inst_py
+        state "Create-Scheduled-Task.ps1" as createsch
+            createsch : mai-start.xml
+            createsch : # mai_system_startup.py
+        state "Install-Pycdf.ps1" as inst_pycdf
+            inst_pycdf: c:\Python27\scripts\pip.exe pycdf==VERSION
+        state "Install-MaiServer.ps1" as inst_maisvr
+            inst_maisvr : # download winsw.exe
+            inst_maisvr : # copy (c:/mai/bootstrap/windows/mai-server.xml)
+            inst_maisvr : # create & start service
+            inst_maisvr : ## Start-Service -name mai-server
+
+    }
+    state construct.py <<mai_inst_bkgd>>
+        construct.py : (<b><u> c:/mai/api/action/construct.py </u></b>)
+        construct.py : # ConstructAction(_run)
+    install_mai --> inst_py
+    inst_pycdf -left-> inst_maisvr
+    download_mai --> install_mai
+    createsch -left-> inst_pycdf
+    inst_py -left-> createsch
+    inst_maisvr -down-> construct.py
+
+    download_mai -> mai_latest
+    inst_py --> python
+    inst_pycdf --> pycdf
+    inst_maisvr --> winsw
+    construct.py --> af_application
+    construct.py --> artfct_ext
+    
+}
+note as construct_note
+    <b><u> construct.py (Ring-down): </u></b>
+    # <b> _write_status </b>
+    # <b> _check_for_not_constructed_file </b>
+    ## ("construct action started")
+    # <b> _download_app_manifest </b>
+    # <b> _create_shutdown_config </b>
+    ## Create-Shutdown-Config.ps1
+    ### (C:\mai\bootstrap\windows)
+    #### (c:\mai\integration\mai_system_shutdown.py)
+    # <b> _download_and_install_extensions
+    ## ARTIFACTORY : (eis-int-all/CDF/components/extensions/)
+    ## install_extentions (mailib\pycdf\utils\extensions.py)
+    # <b> _provision
+    ## <b> Builtin  </b>: (mailib\pycdf\provisioners\builtin.py)
+    ### _provision_iis
+    #### iisposh (.ps1) scripts
+    ### _configure_consul
+    ## <b> Script  </b>: (mailib\pycdf\provisioners\script.py)
+    ### run_command_and_log()
+    #### (mailib\pycdf\utils\utils.py)
+    # <b> _run_scripts </b>
+    #<b>  _run_subaction(ConfigureAction) </b>
+    ## (mailib\pycdf\api\action\configure.py)
+    # <b> _run_subaction(StartAction) </b>
+    ## (mailib\pycdf\api\action\start.py)
+    ## (mailib\pycdf\settings.py)
+    # <b> _remove_not_constructed_file </b>
+    # <b> ._write_status </b>
+    ## <b>  ("construct action completed") </b>
+end note 
+
+    VM_Deployment -up-> construct_note
+
+heat_sc -> download_mai 
+
+}
+
+@enduml
