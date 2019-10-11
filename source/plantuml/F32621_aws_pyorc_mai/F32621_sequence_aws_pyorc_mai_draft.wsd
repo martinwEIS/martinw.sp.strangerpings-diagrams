@@ -1,0 +1,98 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+	
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    header pyorc_aws_sequence_v3.wsd
+    footer Page %page% of %lastpage%
+
+    title F32621 : Extend the Automation Factory's deployment capability of .NET services into AWS
+
+    participant jenkinsPipeline
+    participant "pyorc-aws" as pyorc_aws
+    participant "pyorc-avi" as pyorc_avi
+    participant "MAI" as MAI
+
+    '============ AVI - PRUNE ============ 
+    jenkinsPipeline->pyorc_avi++: AVI: Prune Pools  
+        rnote right of pyorc_avi #fc8c03
+            <b>AVI</b>
+            # Prune_Pools
+        end note
+        pyorc_avi->pyorc_avi
+    pyorc_avi-->jenkinsPipeline--: AVI: Prune Complete        
+
+
+    '============ CLOUDFORMATION ============  
+    jenkinsPipeline->pyorc_aws++: Stack : Prune Stack
+        rnote right of pyorc_aws #65eb34
+            <b>CloudFormation</b>
+            # Prune_Stack
+        end note
+        pyorc_aws->pyorc_aws
+    pyorc_aws -->o jenkinsPipeline--: Stack : Prune Complete
+
+    jenkinsPipeline->pyorc_aws++: Stack : Create EC2
+        rnote right of pyorc_aws #65eb34
+            <b>CloudFormation</b>
+            # Create EC2
+                - w/AutoScale
+        end note
+        pyorc_aws->pyorc_aws        
+            pyorc_aws->MAI++: \t\t MAI: Install Application                   
+            MAI-->pyorc_aws--:\t\t MAI: Install Complete            
+    pyorc_aws -->o jenkinsPipeline--: Stack : EC2 Ready
+
+
+    '============ AVI - POOLS ============ 
+    jenkinsPipeline->pyorc_avi++: AVI: create new blue pool
+        rnote right of pyorc_avi #fc8c03
+            <b>AVI</b>
+            # Create pool
+            # Attach poolGroup
+        end note
+        pyorc_avi->pyorc_avi
+    pyorc_avi -->o jenkinsPipeline--: AVI: Pool ready
+
+
+    '============ VALIDATE ============     
+    jenkinsPipeline++
+        rnote right of jenkinsPipeline #SlateGray
+            <b>Validation</b>
+            # Validate Application
+            ## AVI -> AutoScale Groups
+            ## Port 8000
+        end note
+        jenkinsPipeline->jenkinsPipeline
+    jenkinsPipeline--
+
+
+    '============ PROMOTE ============ 
+    jenkinsPipeline->pyorc_avi++: AVI: start promote
+        rnote right of pyorc_avi #fc8c03
+            <b>AVI</b>
+            # PROMOTE:
+            ## Start Canary
+                - (Blue to Green)
+            ## Attach poolGroup
+        end note
+        pyorc_avi->pyorc_avi
+    pyorc_avi -->o jenkinsPipeline--: AVI: complete promote
+
+@enduml

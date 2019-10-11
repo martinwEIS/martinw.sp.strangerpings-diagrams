@@ -1,0 +1,80 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+	
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    participant jenkinsPipeline
+    participant "pyorc-aws" as pyorc_aws
+    participant "pyorc-avi" as pyorc_avi
+    participant "  MAI  " as MAI
+
+    jenkinsPipeline->pyorc_aws++: Stack : Prune Stack
+        rnote right of pyorc_aws
+            <b>CloudFormation</b>
+            # Prune_Stack
+        end note
+        pyorc_aws->pyorc_aws
+        'pyorc_aws->pyorc_aws: <b>CloudFormation<b> \n * Prune_Stack 
+    pyorc_aws -->o jenkinsPipeline--: Stack : Prune Complete
+        
+    group #65eb34 AVI
+        jenkinsPipeline->pyorc_avi++: AVI: Prune Pools        
+            pyorc_avi->pyorc_avi: <b>AVI<b> \n * Prune_Pools
+
+            pyorc_avi-->jenkinsPipeline--: AVI: Prune Complete        
+            jenkinsPipeline->pyorc_avi++: AVI: create new blue pool
+        
+            pyorc_avi->pyorc_avi: <b> AVI \n * create pool \n * attach poolGroup
+              
+        pyorc_avi -->o jenkinsPipeline--: AVI: Pool ready
+    end    
+
+    jenkinsPipeline->pyorc_aws++: Stack : Create EC2
+            rnote right of pyorc_aws
+                <b>CloudFormation</b>
+                # Create EC2
+                 - w/AutoScale
+            end note
+        pyorc_aws->pyorc_aws
+        'pyorc_aws->pyorc_aws: <b>CloudFormation<b> \n * Create EC2 \n   w/AutoScale
+            group #3493eb MAI
+            
+                'create participant "  MAI  " as MAI
+                        pyorc_aws->MAI++: \t\t MAI: Install Application
+                        MAI-->pyorc_aws--:\t\t MAI: Install Complete
+            end 
+    pyorc_aws -->o jenkinsPipeline--: Stack : EC2 Ready
+
+
+    group #65eb34 AVI
+        jenkinsPipeline->pyorc_avi++: AVI: start promote
+            ' rnote right of pyorc_avi
+            '     <b>AVI</b>
+            '     PROMOTE:
+            '     # Start Canary
+            '      - (Blue to Green)
+            '     # Attach poolGroup
+            ' end note
+            ' pyorc_avi->pyorc_avi
+            pyorc_avi->pyorc_avi: <b> AVI (PROMOTE) \n * Start Canary \n   (Blue to Green) \n * Attach poolGroup   
+           
+        pyorc_avi -->o jenkinsPipeline--: AVI: complete promote
+    end
+
+@enduml

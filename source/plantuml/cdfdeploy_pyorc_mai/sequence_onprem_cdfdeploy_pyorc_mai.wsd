@@ -1,0 +1,205 @@
+' sequence objects : https://www.geeksforgeeks.org/unified-modeling-language-uml-sequence-diagrams/
+' sequence planuml : http://plantuml.com/sequence-diagram
+' object types     : http://www.cs.sjsu.edu/~pearce/modules/lectures/ooa/analysis/ecb.htm
+
+@startuml
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+title Sequence Diagram:On-Prem (CdfDeploy, Pyorc + MAI)
+
+participant AF_Pipeline
+participant Jenkinsfile_
+participant "cdfDeploy \n(cdf_pipeline)" as cdfdp
+
+AF_Pipeline -> Jenkinsfile
+Jenkinsfile -> cdfdp
+
+'-----------------------------
+== Prune ==
+cdfdp -> ci_pipeline
+    group prunePrereleaseArtifacts
+        group _prunePrereleaseArtifacts()
+            rnote over ci_pipeline 
+                pruneArtifacts (ci_pipeline)
+            end note
+        end
+    end
+cdfdp <-- ci_pipeline
+
+'------------------------------
+
+cdfdp -> ci_pipeline
+    group pruneReleaseArtifacts (ci_pipeline)
+        group _pruneReleaseArtifacts()
+            rnote over ci_pipeline
+                pruneArtifacts (ci_pipeline)
+            end note
+        end
+    end
+cdfdp <-- ci_pipeline
+
+'------------------------------
+
+group pruneDockerArtifacts
+    group _pruneVersions
+        rnote over cdfdp
+           _deleteVersions
+        end note
+    end
+end
+
+'-----------------------------
+== Validate Package ==
+
+group validateApplicationPackage
+    group withPyorc
+        rnote over cdfdp
+            # (STASH):
+            ## cdf_docker
+            # (PYORC):
+            ## validate-artifacts-in-file
+        end note
+    end
+end
+
+== Download AppBootStrap ==
+
+create control "context: getBootstrapLibrary" as checkout_abs
+cdfdp -> checkout_abs
+    group Checkout: ApplicationBootStrap
+            rnote over checkout_abs
+                # (STASH):
+                ## ApplicationBootStrap
+            end note
+    end
+cdfdp <-- checkout_abs
+
+== Deployment ==
+
+create "deploymentPriority" as dp
+cdfdp -> dp
+activate dp
+    group getDeploymentPriority
+            rnote over dp
+                # (STASH): EnvironmentManifest
+                # Get list of environmentManifest repo's
+            end note
+    end
+
+'---------- Start 'deploymentPriority' Loop ---------
+loop <b>envIdList </b>
+
+create deployAndSetDeployTime as dasdt
+dp -> dasdt
+
+create cdfDeploySingle as cdfdps
+dasdt -> cdfdps
+
+'---------- Bootstrap ---------
+
+
+create control "context : bootstrap" as cbts
+cdfdps -> cbts
+
+group Bootstrap
+    create entity "step: bootstrap" as sbts
+    cbts -> sbts
+        group withTelemetry
+            group bootstrapApplication
+                rnote over sbts
+                    # <b>downloadArtifact</b>
+                    ## (ARTIFACTORY)  Inf_manifest
+                    # <b>withPyorc </b>
+                    ## ansible-playbook RegisterApplication.yaml
+                end note
+            end 
+        end
+    cbts <-- sbts
+end
+'---------- Deploy ---------
+create control "context : deploy" as cdeploy
+cdfdps -> cdeploy
+
+group Deploy
+    create entity "step: deploy" as sdeploy
+    cdeploy -> sdeploy
+    
+    create entity "step: deploy-prune" as sdprune
+    sdeploy -> sdprune
+        group withTelemetry
+            group withPyorc        
+                rnote over sdprune
+                    # heat-stack-prune
+                end note        
+            end
+        end
+    sdeploy <-- sdprune
+    
+    create entity "step: deploy-converge" as sdconverge
+    sdeploy -> sdconverge
+        group withTelemetry
+                group withPyorc        
+                    rnote over sdconverge
+                        # heat-stack-create
+                        # wait-for-converge
+                        # avi-promote-to-test
+                    end note        
+                end
+        end
+    cdeploy <-- sdconverge
+end
+
+'---------- Validate ---------
+create entity "step: validate" as svalidate
+group Validate
+    cdeploy -> svalidate
+    group withTelemetry
+        group withPyorc        
+            rnote over svalidate
+                # testBlock
+                ## Heat-stack-prune
+            end note        
+        end
+    end
+    cdeploy <-- svalidate 
+end
+
+'---------- Promote ---------
+create entity "step: promotion" as spromote
+group Promote
+    cdeploy -> spromote
+    group withTelemetry
+        group withPyorc        
+            rnote over spromote
+                # avi-canary-prepare
+                # avi_canary_step
+                # avi-canary-abort
+                # avi-promote-to-active   
+            end note        
+        end
+    end
+    dasdt <-- spromote
+end
+'---------- Consul Pool Timestamp Update ---------
+== Consul - BrownpoolTimestamp ==
+create setConsulKV as sckv
+group BrownpoolTimestamp
+    dasdt -> sckv            
+        rnote over sckv
+            setConsulKV
+            envId: envId,
+            key: consulBrownpoolTimestamp,
+            value: getCurrentTime()
+        end note        
+    dasdt <-- sckv
+end
+
+'---------- End 'deploymentPriority' Loop ---------
+end
+
+@enduml
+

@@ -1,0 +1,40 @@
+' reference       : http://plantuml.com/deployment-diagram
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+skinparam rectangle {
+	roundCorner 25
+    'BackgroundColor DarkSeaGreen
+    BorderColor DarkSlateGray
+
+    BackgroundColor<< PyOrc >> Green/Yellow
+    BorderColor<< PyOrc >> DarkSlateGray
+
+    BackgroundColor<< HeatTemplate >> Red/Yellow
+    BorderColor<< HeatTemplate >> DarkSlateGray
+    
+}
+
+rectangle "CDF_PIPELINE"  {
+	rectangle "withPyOrc" << PyOrc >>  as pyo
+	rectangle "Parameters" << HeatTemplate >> as ht
+    pyo -> ht
+}
+
+rectangle "Source_Application"  {
+	rectangle "Inf_Manifest"  as Infman
+   note right
+    This note is on several
+    //lines// and can
+    contain <b>HTML</b>
+    ====
+    * Calling the method ""foo()"" is prohibited
+   end note
+} 
+
+ht <--> Infman
+Infman -left-> left
+@enduml
