@@ -1,0 +1,81 @@
+@startuml
+[*] --> CICD
+
+
+  state CICD {
+
+    state "ats-client-ami" as atsCliami {
+        atsCliami: test note
+    }
+
+
+    ||
+
+    state "ats-scheduler-ami" as atsSchami {
+        atsSchami: test note
+    }
+
+
+    ' [*] -> Agena:BuildClientAMI
+    ' Agena:BuildClientAMI --> atsSchBuild
+    ' atsSchBuild --> S3: EvNum
+    ' S3 --> [*]
+
+
+
+
+
+    ||
+
+    [*] -> Agena:Build
+    Agena:Build --> atsSchBuild
+    atsSchBuild --> S3: EvNum
+    S3 --> [*]
+
+
+    state "ats-scheduler-build" as atsSchBuild {
+        atsSchBuild: test note
+    }
+
+    ||
+
+    [*] -> Agena:Deploy
+    Agena:Deploy--> atsSchDeploy
+    ataSchAmi2 -right-> atsSchDeploy
+    deployAmi -left-> atsSchDeploy
+    atsSchDeploy --> atsSchStack
+    atsSchStack --> ec2AtsSchServer
+    ec2AtsSchServer --> [*] : EC2: ATS-Scheduler\n Server Created
+
+    state "ats-scheduler-deploy" as atsSchDeploy
+    state "S3" as deployAmi {
+        deployAmi: ats-scheduler artifact
+    }
+    state "AMI" as ataSchAmi2 {
+        ataSchAmi2 : ats-scheduler-ami
+    }
+    state "AWS-LZ \nCloudFormation Stack" as atsSchStack {
+        atsSchStack : Account = <b>eis.lz.shared</b>
+        atsSchStack : Stack = af-ats-scheduler-stack
+    }
+
+    state "EC2: ATS-Scheduler" as ec2AtsSchServer
+
+    ' ||
+
+    ' [*] -> ScrollLockOff
+    ' ScrollLockOff --> ScrollLockOn : EvCapsLockPressed
+    ' ScrollLockOn --> ScrollLockOff : EvCapsLockPressed
+}
+
+
+
+state RUNTIME
+
+
+CICD --> RUNTIME
+RUNTIME --> CICD
+
+
+
+@enduml

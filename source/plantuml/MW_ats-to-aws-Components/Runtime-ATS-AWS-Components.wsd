@@ -1,0 +1,44 @@
+@startuml
+
+
+state AGENA
+
+state "RUNTIME" as RUNTIME {
+
+    state entryRuntime <<expansionInput>>
+
+
+
+    state "ATS Quality Gate" as atsQualityGate {
+        state entryQualityGate <<expansionInput>>
+        state qualityGateApp : platform.af.ats-qualitygate
+        state exitQualityGate <<outputPin>>
+    }
+
+
+    state "ci-pipeline" as ciPipeline {
+        state entryCiPipeline <<inputPin>>
+        state callatspipeline
+        state exitCiPipeline <<outputPin>>
+
+    }
+
+    state ".Net Application" as dotNetApp {
+        state entryDotNet <<inputPin>>
+        state Jennkinsfile
+        state exitDotNet <<outputPin>>
+    }
+
+    exitDotNet --> entryCiPipeline
+    exitCiPipeline --> entryQualityGate
+
+
+    }
+
+
+[*] --> AGENA
+AGENA --> entryRuntime
+
+
+
+@enduml

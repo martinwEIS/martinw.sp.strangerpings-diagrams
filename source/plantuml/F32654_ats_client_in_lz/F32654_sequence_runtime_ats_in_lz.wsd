@@ -1,0 +1,117 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+
+    GroupBackgroundColor White
+    GroupBodyBackgroundColor LightBlue
+    GroupBorderColor Blue
+
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    header F32654_sequence__runtime_ats_in_lz.wsd
+    footer Page %page% of %lastpage%
+
+    title F32654 : ATS in LZ - Runtime Sequence Diagram
+
+    participant "af.pipeline" as afpipeline
+    participant "ats-sequencer" as sequencer
+    participant "ats-environment-provider" as envpro
+    participant "Cloudformation" as cloudform
+    participant "EC2" as ec2
+    participant "Artifactory" as artifact
+    participant "S3" as s3
+    database "ats-database-server \n(ON-PREM)" as opatsdatabase
+    database "ats-database-server \n(AWS)" as atsdatabase
+
+    group "Feature F32654  - Part 1"
+        afpipeline -> sequencer
+        sequencer -> envpro
+        envpro -> cloudform
+        cloudform -> ec2++
+            rnote right of ec2 #fc8c03
+                <b> Create :</b>
+                * EC2 Clients
+                ** ats-client AMI
+                ** <b>AWS Spot Instances</b>
+            end note
+        envpro <-- ec2--
+
+        envpro++
+            rnote right of envpro #fc8c03
+                <b> Provide list of :</b>
+                * EC2 Clients
+            end note
+        sequencer <-- envpro--
+    end
+
+== Sequencer : Setup ==
+    group "Feature F32654  - Part 1"
+        sequencer -> artifact++ : Download EPADI
+            rnote right of artifact #fc8c03
+                <b>Download :</b>
+                * EPADI Utilities
+            end note
+        sequencer <-- artifact--
+    end
+
+    sequencer -> s3++ : Download EPADI
+        rnote right of s3 #fc8c03
+            <b>Download :</b>
+            * EPADI Utilities
+        end note
+    sequencer <-- s3--
+
+    group "Feature F32654  - Part 1"
+        sequencer -> ec2++ : Update Clients
+            rnote right of ec2 #fc8c03
+                <b>Install :</b>
+                * EPADI Utilities
+                * PAL tests
+            end note
+        sequencer <-- ec2--
+    end
+
+== Sequencer : Execution ==
+    group "Feature F32654  - Part 1"
+        loop "<b>  One test executed at a time per client </b>"
+            sequencer -> ec2++ : Initial test run
+                ec2 -> opatsdatabase : Report Test Result
+            sequencer <-- ec2
+            sequencer -> ec2 : Retry failed tests
+                ec2 -> opatsdatabase : Report Test Result
+            sequencer <-- ec2--
+        end
+        afpipeline <-- sequencer
+    end
+
+== Sequencer : Cleanup ==
+
+    group "Feature F32654  - Part 1"
+        sequencer -> envpro : Initiate Cleanup
+            envpro -> cloudform
+                cloudform -> ec2++
+                rnote right of ec2 #fc8c03
+                    <b>Delete EC2(s):</b>
+                    * Sequencer initiates deletion
+                    of all EC2 clients when
+                    test run completes
+                end note
+                cloudform <-- ec2--
+    end
+
+@enduml

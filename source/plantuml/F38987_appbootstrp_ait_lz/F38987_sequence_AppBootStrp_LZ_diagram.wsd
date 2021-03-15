@@ -1,0 +1,73 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+	
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    'header pyorc_aws_sequence_v3.wsd
+    footer Page %page% of %lastpage%
+
+    title F38987 : Deploy ApplicationBootStrap in EIS Landing Zone
+
+    participant "ApplicationBootStrap" as appbootstrp
+    participant "ciDockerPythonTool \n(af_pipeline)" as af_pipeline
+    participant "Avi" as avi
+    participant "Route53" as rt53
+    participant "AWS ECR" as ecr
+
+    appbootstrp ->  af_pipeline++ :  Create docker container
+    appbootstrp <-- af_pipeline--
+==Setup==
+    appbootstrp ->  avi++ : Create Pool Groups
+    appbootstrp <-- avi--
+    appbootstrp ->  avi++ : Create VS
+    appbootstrp <-- avi--
+    appbootstrp ->  rt53++ : Create VS DNS
+    appbootstrp <-- rt53-- 
+==IntegrationTest==
+    appbootstrp -> avi++ : Create Child Test Pools & Instances    
+        rnote right of avi #fc8c03
+            <b>AWS</b>
+            # Create Test EC2's
+            # Attach to Pools
+        end note
+    avi -> avi    
+    appbootstrp <-- avi--
+==Cleanup==
+    appbootstrp ->  avi++ : Clean Up Child Test Pools & Instances    
+        rnote right of avi #fc8c03
+            <b>AWS</b>
+            # Detach from Pools
+            # Delete Test EC2's
+        end note
+    avi -> avi 
+    appbootstrp <-- avi--
+==Publish==
+    appbootstrp -> af_pipeline++
+    af_pipeline -> ecr-- : Publish Docker Container to ECR
+
+
+
+    ' create_ec2 -> install_sftw
+    ' install_sftw -> create_img++
+    ' create_img -> create_ec2_img
+    ' create_ec2_img -> validate_sftw++
+    ' validate_sftw --> create_img--
+    ' create_img -> pub_image--
+
+@enduml

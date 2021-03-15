@@ -1,0 +1,135 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+
+    GroupBackgroundColor White
+    GroupBodyBackgroundColor LightBlue
+    GroupBorderColor Blue
+
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    header F32654_sequence_deploy_ats_in_lz.wsd
+    footer Page %page% of %lastpage%
+
+    title F32654 : ATS in LZ - Deployment Sequence Diagram
+
+    actor "DBOps" as dbops
+    participant "jenkins-ssplatform2" as jenkinss
+    participant "Application \nAMI Pipeline" as appami
+    participant "S3" as s3
+    entity "AMI" as ami
+    participant "Medusa \nPipeline" as medusa
+    participant "Medusa Archetype \nCloudformation" as cloudform
+    participant "EC2" as ec2
+    database "Velocity Cloud \n(MSSQL)" as velocity
+
+
+== Create : Application AMI==
+
+    jenkinss -> appami++ : ats-environment-provider
+        rnote right of appami #fc8c03
+            <b>Create AMI :</b>
+            * ats-environment-provider
+            * S3 : Build Artifacts
+        end note
+        appami -> s3 : Get : Build Artifacts
+        appami <-- s3
+        appami -> ami : Publish : AMI
+        appami <-- ami
+    jenkinss <-- appami--
+
+    jenkinss -> appami++ : ats-sequencer
+        rnote right of appami #fc8c03
+            <b>Create AMI :</b>
+            * ats-sequencer
+            * S3 : Build Artifacts
+        end note
+        appami -> s3 : Get : Build Artifacts
+        appami <-- s3
+        appami -> ami : Publish : AMI
+        appami <-- ami
+    jenkinss <-- appami--
+
+    group  "Feature F32654  - Part 1"
+    jenkinss -> appami++ : ats-client
+        rnote right of appami #fc8c03
+            <b>Create AMI :</b>
+            * ats-client
+        end note
+        appami -> ami : Publish : AMI
+        appami <-- ami
+    jenkinss <-- appami--
+    end
+
+== Deployment : ATS SQL Server==
+
+    dbops -> velocity : Deploy : ats-database-server (deployed by DBOps)
+        rnote right of velocity #fc8c03
+            <b>Velocity Cloud :</b> MSSQL Server
+            * <b>Instance : ats-database-server </b>
+            ** Database(s):
+            *** EnvironmentService
+            *** RegressionSuite
+            *** ReportServer
+            *** UTIL
+            * <b>Instance : ATS-Sequencer </b>
+            ** Database(s):
+            *** ReportServer
+            *** ReportServerTest
+        end note
+    dbops <-- velocity
+
+== Deployment : ATS Components==
+
+    jenkinss -> medusa : Deploy : ATS Components
+    medusa -> cloudform++
+        rnote right of cloudform #fc8c03
+            <b>Medusa Archetype:</b>
+            <b>Cloudformation</b>
+            * ats-environment-provider
+        end note
+        cloudform -> ami++ : AMI : ats-environment-provider
+        cloudform <-- ami--
+        cloudform -> ec2++
+            rnote right of ec2 #fc8c03
+                <b>Create EC2:</b>
+                * ats-environment-provider
+            end note
+        cloudform <-- ec2--
+    medusa <-- cloudform--
+    jenkinss <-- medusa
+
+    jenkinss -> medusa : Deploy : ats-sequencer
+    medusa -> cloudform++
+        rnote right of cloudform #fc8c03
+            <b>Medusa Archetype:</b>
+            <b>Cloudformation</b>
+            * ats-sequencer
+        end note
+        cloudform -> ami++ : AMI : ats-sequencer
+        cloudform <-- ami--
+        cloudform -> ec2++
+            rnote right of ec2 #fc8c03
+                <b>Create EC2:</b>
+                * ats-sequencer
+            end note
+        cloudform <-- ec2--
+    medusa <-- cloudform--
+    jenkinss <-- medusa
+
+@enduml

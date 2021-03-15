@@ -1,0 +1,151 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+
+    GroupBackgroundColor White
+    GroupBodyBackgroundColor LightBlue
+    GroupBorderColor Blue
+
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    header F45572_ats_runtime_ats_in_lz.wsd
+    footer Page %page% of %lastpage%
+
+    title F45572 : ATS in LZ - Runtime Sequence Diagram
+
+    participant "Medusa" as medusa
+    participant "ATS QualityGate" as qualitygate
+    participant "ATS Scheduler" as scheduler
+    participant "CloudFormation" as cloudform
+    participant "EC2" as ec2
+    participant "SSM" as ssm
+    participant "S3" as s3
+    participant "FileUpload service \nPort: 8080" as fileupload
+    database "Velocity Cloud\n(MSSQL)" as atsdatabase
+
+== Start : ATS Scheduler ==
+    group "Feature F45572 - Part 2"
+        medusa -> qualitygate : Pipeline step to execute e2e tests
+        qualitygate -> scheduler : Callback program on the Jenkins worker
+            rnote right of qualitygate #fc8c03
+                <b>Setup :</b>
+                * Validate test job XML
+                * Add AWS tags
+                * Invoke test run 
+                * Poll scheduler for status
+            end note
+        scheduler -> cloudform : Create test infrastructure
+    end
+    group "Feature F32654 - Part 1"
+        cloudform <-> ssm : Get latest ATS Client AMI version
+            rnote right of cloudform #fc8c03
+                <b>Configure :</b>
+                * ATS Client AMI
+                * EC2 credentials
+                * Availability zones
+            end note
+        cloudform -> s3++
+            rnote right of s3 #fc8c03
+                <b>Download :</b>
+                * Regressionsuite
+                * EPADI utilities
+            end note
+        cloudform <-- s3--
+        cloudform -> ec2++
+            rnote right of ec2 #fc8c03
+                <b>Create :</b>
+                * ATS Client EC2s (Spot Instances)
+                * Install Regressionsuite
+                * Install EPADI utilities
+                * Enable autologon
+                * Enable RDP
+                * Start the AMI process
+            end note
+        cloudform <-- ec2--
+        cloudform -> ec2++
+            rnote right of ec2 #fc8c03
+                <b>Provide list of IPs:</b>
+                * ATS Clients
+            end note
+        cloudform <-- ec2--
+        scheduler <-- cloudform-- : Ready to begin test run
+    end
+
+== Configure : ATS Clients ==
+    group "Feature F32654 - Part 1"
+        scheduler -> ec2++ : Update ATS Clients
+            rnote right of scheduler #fc8c03
+                <b>Install :</b>
+                * Net use
+                * Download PAL tests from Artifactory
+                * Copy PAL tests to the client(s)
+            end note
+        scheduler <-- ec2--
+    end
+
+== Execute : ATS Tests ==
+    group "Feature F32654 - Part 1"
+        loop
+            scheduler -> ec2++ : Start test run (contains 1 or more test suites)
+            loop
+                scheduler --> ec2 : Start test suite (contains 1 or more tests)
+                loop
+                    rnote right of ec2 #fc8c03
+                        <b>Execute test:</b>
+                        * Run one test per client
+                        * Retry test suite if there are failures
+                    end note
+                    ec2 -> atsdatabase : Report test result (pass/fail)
+                    ec2 -> fileupload++ : On <b>failure</b> send image
+                        rnote right of fileupload #fc8c03
+                        <b>Store :</b>
+                        * Image of the test failure on the scheduler
+                        end note
+                    fileupload -> atsdatabase : Add image link to the test report
+                    ec2 <-- fileupload--
+                end
+                scheduler <- ec2 : Test suite complete
+            end
+            scheduler <-- ec2-- : Test run complete
+        end
+    end
+
+== Delete : Test Infrastructure (ATS Clients) ==
+    group "Feature F32654 - Part 1"
+
+        scheduler -> cloudform : Cleanup test clients
+        cloudform -> ec2++
+        rnote right of cloudform #fc8c03
+            <b>Cleanup ATS Clients:</b>
+            * Delete all EC2s after
+              test run is complete
+        end note
+        cloudform <-- ec2--
+        scheduler <- cloudform
+    end
+    group "Feature F45572 - Part 2"
+            rnote right of scheduler #fc8c03
+            <b>Result :</b>
+            * Result of test run (pass/fail)
+            * Link to test report
+            end note
+        qualitygate <-- scheduler-- : Return control to callback
+        medusa <-- qualitygate-- : Return test report link to the pipeline
+    end
+
+@enduml

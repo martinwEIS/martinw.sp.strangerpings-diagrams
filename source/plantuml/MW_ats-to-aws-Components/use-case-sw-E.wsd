@@ -1,0 +1,51 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+skinparam roundcorner 30
+title Use Case - E
+
+' PARTICIPANTS
+actor :User: as user
+
+'GIVEN + WHEN + THEN
+ note left of user #LightGray
+   <b>GIVEN</b> a peer supporter will need to
+   connect a member to a crisis counselor
+
+   <b>WHEN</b> a member has expressed has a
+   plan to do harm to themselves or others
+
+   <b>THEN</b> a peer supporter will send a message
+   via CSOM to confirm a CC is available, and send a message
+   to the member to initiate contact with a Crisis Counselor
+ end note
+
+'WORKFLOW
+rectangle "Peer Supporter\nCommunication Flow" as commflow {
+  actor/ :Peer Supporter: as ps
+
+  rectangle "Message App" as msgAppFm {
+    usecase "Facebook Messenger" as fm
+  }
+}
+
+rectangle "Crisis Counselor\nCommunication Flow" as commflow2 {
+  actor/ :Crisis Counselor: as cc
+
+  rectangle "Message App" as msgAppCsom {
+    usecase/ "Facebook \nMessenger (CSOM)" as csom
+    usecase/ "Facebook \nMessenger (CSOM)" as csom2
+  }
+}
+
+'INITIAL CONTACT
+user --> fm #red;line:red;line.bold;text:red : 1.1\n User has\nsuicidal\nthoughts
+'AVAILABLE
+fm --> ps #red;line:red;line.bold;text:red  : 1.2\n User\n accepts\nCrisis\nCounselor\nassistance
+'VERIFY CRISIS COUNSELOR AVAILABLE
+ps -up-> csom #red;line.bold;line:red;text:red : 1.3\n PS verify Crisis\n Counselor available
+csom --> cc #red;line.bold;line:red;text:red
+'USER CONTACTS CRISIS COUNSELOR
+user --> csom2 #aliceblue;line.dotted;line:blue;text:blue : 2.1\nUser initiates\nCSOM request
+csom2 --> cc #aliceblue;line.dotted;line:blue;text:blue : 2.2\nUser connects\nwith Crisis Counselor
+@enduml

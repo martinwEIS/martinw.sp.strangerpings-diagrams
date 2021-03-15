@@ -1,0 +1,125 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+
+    GroupBackgroundColor White
+    GroupBodyBackgroundColor LightBlue
+    GroupBorderColor Blue
+
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    header F45572_ats_deploy_ats_in_lz.wsd
+    footer Page %page% of %lastpage%
+
+    title F45572 : ATS in LZ - Deployment Sequence Diagram
+
+    participant "Jenkins" as jenkins
+    participant "Medusa" as medusa
+    participant "Application \nAMI Pipeline" as appami
+    participant "CloudFormation" as cloudform
+    participant "ALB" as alb
+    participant "EC2" as ec2
+    participant "SSM" as ssm
+    participant "S3" as s3
+    entity "AMI" as ami
+    actor "DBOps" as dbops
+    database "Velocity Cloud\n(MSSQL)" as velocity
+
+== Create : ATS Application AMI ==
+    group  "Feature F45572 - Part 2"
+        jenkins -> appami++ : Execute Application AMI pipeline
+        appami <-> ssm : Get <b>Latest</b> ATS Scheduler build path
+        appami -> s3 : Get <b>Latest</b> ATS Scheduler build package
+            rnote right of s3 #fc8c03
+                <b>Download :</b>
+                * Regressionsuite
+                * EPADI
+                * Fileupload
+                * Filecleanup
+            end note
+        appami <-- s3
+            rnote right of appami #fc8c03
+                <b>Install/Verify ATS Scheduler : Ansible</b>
+                * Regressionsuite service
+                * EPADI service (AMI)
+                * Fileupload service (IIS)
+                * Filecleanup service
+                * Windows configuration
+            end note            
+        appami <-> ami : Publish : ATS Scheduler AMI path
+        appami <-> ssm : Store ATS AMI version (Latest)
+        jenkins <-- appami-- : Return build status
+    end
+
+== Deploy : ATS Application AMI ==
+    group  "Feature F45572 - Part 2"
+        jenkins -> medusa : Deploy ATS Scheduler AMI
+        medusa -> cloudform++
+            rnote right of medusa #fc8c03
+                <b>Medusa Archetype:</b>
+                * ATS Scheduler AMI
+            end note
+            cloudform <-> ssm : Get <b>Latest</b> ATS Scheduler AMI path
+            cloudform <-> s3 : Get <b>Latest</b> ATS Scheduler AMI
+            cloudform -> alb++
+                rnote right of alb #fc8c03
+                    <b>Create routing rules for the ALB:</b>
+                    * Port: 5200 Regressionsuite service
+                    * Port: 8701 EPADI service (AMI)
+                    * Port: 8080 Forward to Port: 85
+                    * Port: 85 Fileupload service (IIS)
+                end note
+            cloudform <- alb--
+            cloudform -> ec2++
+                rnote right of ec2 #fc8c03
+                    <b>Create ATS Scheduler:</b>
+                    * Regressionsuite service
+                    * EPADI service
+                    * Fileupload service
+                    * Filecleanup service
+                end note
+            cloudform <-- ec2--
+            cloudform -> alb++           
+                rnote right of alb #fc8c03
+                    <b>Verify ATS Scheduler (REST API):</b>
+                    * Regressionsuite service
+                    * EPADI service (AMI)
+                    * Fileupload service
+                end note
+            cloudform <-- alb--
+        medusa <-- cloudform--
+        jenkins <-- medusa : Return deployment status
+    end
+
+== Deploy : ATS SQL Server ==
+    group  "Feature F45572 - Part 2"
+        dbops -> velocity : Deploy : ats-database-server
+            rnote right of velocity #fc8c03
+                <b>Velocity Cloud :</b> MSSQL Server
+                * <b>Instance : ats-database-server </b>
+                ** SQL Server Reporting Services (SSRS)
+                ** SQL Database(s):
+                *** EnvironmentService
+                *** RegressionSuite
+                *** ReportServer
+                *** ReportServerTest                
+            end note
+        dbops <-- velocity
+    end
+
+@enduml

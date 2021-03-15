@@ -1,0 +1,384 @@
+b'
+' reference       : http://plantuml.com/state-diagram
+' skinparam       : http://plantuml.com/skinparam
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+hide empty description
+'scale 900 width
+'scale max 1024 width
+
+'---- Title Format Settings ----
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+'---- Object Format Settings ----
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BorderColor Black
+  BackgroundColor<<awslz_bkgd>> #62B2FF
+  BackgroundColor<<lz_bkgd>> #62B2FF
+  BackgroundColor<<cloudformation_bkgd>> YellowGreen/White
+  BackgroundColor<<iam_bkgd>> YellowGreen/White
+  BackgroundColor<<s3_bkgd>> #OrangeRed
+  BackgroundColor<<r53_bkgd>> #Orange
+  BackgroundColor<<ec2_bkgd>> #Darkorange/White
+  BackgroundColor<<ssm_bkgd>> #LightGray
+  BackgroundColor<<ecr_bkgd>> #SteelBlue/White
+  BackgroundColor<<prom_bkgd>> #OrangeRed
+  BackgroundColor<<elk_bkgd>> #DarkGoldenRod
+  BackgroundColor<<jenkins_bkgd>> #LightSteelBlue
+  BackgroundColor<<github_bkgd>> #LightSlateGray
+  BackgroundColor<<leader_bkgd>> #Tomato
+  'FontName Aapex
+  'AWS Orange : #FF9900 / Blue : #62B2FF
+  'Github : #F4CBB2
+
+}
+
+title Fxxxx : AF ATS - AWS LZ Integration
+
+state "<b> ATS </b>\n on-prem" as onprem <<iam_bkgd>> {
+
+}
+
+state "<b> ATS </b>\n AWS LZ" as awslz <<awslz_bkgd>> {
+
+
+    ' state Active {
+    '     [*] -> NumLockOff
+    '     NumLockOff --> NumLockOn : EvNumLockPressed
+    '     NumLockOn --> NumLockOff : EvNumLockPressed
+    '     --
+    '     [*] -> CapsLockOff
+    '     CapsLockOff --> CapsLockOn : EvCapsLockPressed
+    '     CapsLockOn --> CapsLockOff : EvCapsLockPressed
+    '     --
+    '     [*] -> ScrollLockOff
+    '     ScrollLockOff --> ScrollLockOn : EvCapsLockPressed
+    '     ScrollLockOn --> ScrollLockOff : EvCapsLockPressed
+    ' }
+
+    ' state "AWS SERVICES" as awsServices {
+
+        state S3
+
+        state SSM
+
+        state "EC2" as AMI {
+            AMI: <b>    AMI
+        }
+
+    ' }
+
+
+
+    state "AGENA (Jenkins)" as agena {
+        state entryAgena <<inputPin>>
+        state exitAgena <<expansionOutput>>
+    }
+
+
+state BUILD {
+    state entryBuild <<expansionInput>>
+
+    state "SOURCE" as buildSrc {
+
+        state entrySchBuild <<expansionInput>>
+        state "platform.af\n.ats-scheduler-build" as atsSchBuild
+        state exitSchBuild <<outputPin>>
+
+    }
+
+
+
+    state "AMI" as buildAmi {
+        buildAmi : \t\t\t\t<b>Application AMI pipeline
+
+        state entryAppAmiPipe <<expansionInput>>
+        state exitAppAmiPipe <<outputPin>>
+        ' note as noteGoldenAmi
+        '  <b>Windows 2016 Golden AMI :</b>
+        '  * eis-lz-shared
+        '  ** /platform/af/ats-scheduler-ami/latest
+        ' end note
+
+            state "2016 Golden AMI" as goldAmi
+            state "platform.af\n.ats-client-ami" as atsClientAmi
+            state "platform.af\n.ats-scheduler-ami" as atsSchAmi
+
+
+            ' note top of goldAmi
+
+
+
+    }
+}
+    state "DEPLOY" as deploy {
+        state entrySchDeploy <<expansionInput>>
+        state "platform.af\n.ats-scheduler-deploy" as atsSchDeploy
+        ' state exitSchDeploy <<outputPin>>
+
+
+        state "ats-scheduler" as atsSchServer {
+        state entryAtsSchServer <<expansionInput>>
+        state "Stack : \n<b> af-ats-scheduler-stack" as atsSchStack
+        state exitAtsSchServer <<outputPin>>
+        }
+
+    }
+
+
+
+    state "RUNTIME" as runtime {
+
+            state entryRuntime <<expansionInput>>
+
+
+
+            state "ATS Quality Gate" as atsQualityGate {
+                state entryQualityGate <<expansionInput>>
+                state qualityGateApp : platform.af.ats-qualitygate
+                state exitQualityGate <<outputPin>>
+            }
+
+
+            state "ci-pipeline" as ciPipeline {
+                state entryCiPipeline <<inputPin>>
+                state callatspipeline
+                state exitCiPipeline <<outputPin>>
+
+            }
+
+            state ".Net Application" as dotNetApp {
+                state entryDotNet <<inputPin>>
+                state Jennkinsfile
+                state exitDotNet <<outputPin>>
+            }
+
+            exitDotNet --> entryCiPipeline
+            exitCiPipeline --> entryQualityGate
+
+
+    }
+
+
+
+
+
+
+    [*] --> entryAgena
+    exitAgena --> entryBuild
+    entryBuild --> entryAppAmiPipe
+    entryBuild --> entrySchBuild
+    exitAgena --> entrySchDeploy
+    exitAgena --> entryRuntime
+
+    '----BUILD---------
+    atsSchBuild -[#blue]-> S3: POST :\nATS-Scheduler Artifact
+
+    goldAmi --> atsClientAmi
+    goldAmi --> atsSchAmi
+
+    atsSchAmi -[dashed,#blue]-> SSM : Lookup Latest \nATS-Scheduler Artifact
+    atsSchAmi -[dashed,#blue]-> S3 : Get Latest \nATS-Scheduler Artifact
+    atsSchAmi -[#blue]-> AMI : POST : AMI \nATS-Scheduler
+
+    atsClientAmi -[#blue]-> AMI : POST : AMI \nATS-Client
+
+
+
+
+
+    ' exitAppAmiPipe --> ami
+    ' exitAppAmiPipe --> SSM
+
+    '----DEPLOY---------
+
+    atsSchDeploy -[dashed,#blue]-> SSM : Lookup Latest \nScheduler AMI ID
+    atsSchDeploy -[dashed,#blue]-> AMI : Get Client AMI
+    atsSchDeploy -[#blue]-> AMI : Create AMI
+
+
+    atsSchStack -[dashed,#blue]-> SSM : Lookup Latest \nClient AMI ID
+    atsSchStack -[dashed,#blue]--> AMI : Get Client AMI
+
+
+
+
+
+    '----RUNTIME---------
+    exitQualityGate -> entryAtsSchServer
+
+
+
+
+
+
+
+
+
+
+
+
+' state "<b> ATS </b>\n<b> on-prem and AWS LZ</b>" as awslz <<awslz_bkgd>>  {
+
+'     ' ------ START : REGION ------
+'     state "<b> REGION </b> \n<b> us-east-1 </b> " as region <<lz_bkgd>> {
+
+'         state "<b> Route53 </b>" as route53 <<r53_bkgd>> {
+'             route53: <b>Hosted Zone</b> : ehost-devqa.eislz.com
+'             route53: <b>A Record</b> : af-consul-ehost-devqa.ehost-devqa.eislz.com
+'         }
+
+'         state "<b> Load Balancer\n <b> af-consul-ehost-devqa  </b>" as regionLB <<ec2_bkgd>>
+
+'         state "<b> AZ1 </b>" as az1 <<lz_bkgd>> {
+
+'             state "<b>Consul Cluster:</b>\n<b>Node 1</b>" as node1 <<ec2_bkgd>>{
+'                 node1 : UserData:
+'                 node1 : \t - Telegraf
+'                 node1 : \t - Filebeat
+'                 state "docker-consul-agent" as dockeragent1
+'             }
+
+'             note "<b> CLUSTER LEADER </b>\n Quorum maintained by Consul\n gossip/consensus\n among 3 nodes" as N1 #Red
+
+'             N1 -right-> node1
+
+'         }
+
+'         state "<b> AZ1 </b>" as az1_kv <<lz_bkgd>> {
+'             state "<b>Kv-Sync:</b>\n<b>Node 1</b>" as kvnode1 <<ec2_bkgd>> {
+'                 kvnode1 : UserData:
+'                 kvnode1 : \t - Filebeat
+'                 kvnode1 : \t - Git2Consul (Poll : 1 minute)
+'                 state "docker-git2consul" as dockergit2consul
+'                 state "docker-consul-agent" as dockeragentkv
+'             }
+'         }
+
+'         state "<b> AZ2 </b>" as az2 <<lz_bkgd>> {
+'             state "<b>Consul Cluster:</b>\n<b>Node 2</b>" as node2 <<ec2_bkgd>> {
+'                 node2 : UserData:
+'                 node2 : \t - Telegraf
+'                 node2 : \t - Filebeat
+'                 state "docker-consul-agent" as dockeragent2
+'             }
+'         }
+'         state "<b> AZ3 </b>" as az3 <<lz_bkgd>> {
+'             state "<b>Consul Cluster:</b>\n<b>Node 3</b>" as node3 <<ec2_bkgd>> {
+'                 node3 : UserData:
+'                 node3 : \t - Telegraf
+'                 node3 : \t - Filebeat
+'                 state "docker-consul-agent" as dockeragent3
+'             }
+'         }
+
+'     }
+'     ' ------ END : REGION ------
+
+
+'     ' ------ BEGIN : GITHUB ------
+'     state "<b> GitHub </b>  \n(Environment Manifest)" as github_envmanifest <<github_bkgd>> {
+
+'         state "platform.af.environment-manifest" as envmanifest
+'     }
+'     ' ------ END : GITHUB ------
+
+
+'     ' ------ BEGIN : JENKINS ------
+'     state "<b> Jenkins </b> \n (jenkins-ssplatform2.ss.eislz.com)" as jenkins_ssplatform2_registrar <<jenkins_bkgd>> {
+
+'         state "<b>Registrar</b> \n (EnvironmentManifest \n Sync Service)" as registrar <<ec2_bkgd>> {
+
+'             state "docker-consul-agent" as dockeragent_registrar
+
+'             state "<b> registrar </b>" as registrar_repo {
+'                 registrar_repo : - Docker Image
+'                 registrar_repo : - Python Consul Scripts
+
+'             }
+'         }
+'     }
+'     ' ------ END : JENKINS ------
+
+
+'     state "<b>ELK - Logstash</b>" as elk <<elk_bkgd>>
+
+'     state "<b>Prometheus</b>" as prom <<prom_bkgd>>
+
+'     ' ------ BEGIN : NOTES ------
+'     note left of elk
+
+'         <b>Logstash & Prometheus :</b>
+'         For each EC2 both
+'         Telegraf & Filebeat clients
+'         are configured to connect
+'         to the Logstash
+'         & Prometheus service
+'         setup in the LZ
+'     end note
+
+'     note bottom of dockergit2consul
+
+'         <b>Git2Consul :</b>
+'         Runs in a docker container,
+'         downloads EnvironmentManifest
+'         repo and compares to Consul.
+'         Differences are then written
+'         back to Consul by the
+'         docker-consul-agent.
+'         Polling frequency : 1 minute
+'     end note
+
+'     note bottom of registrar_repo
+
+'         <b>Registrar :</b>
+'         Services in EnvironmentManifest
+'         ServiceEndpoints.json are
+'         registered or updated in
+'         the Consul Catalog via Registrar
+'         when an EnvironmentManifest PR
+'         merges to Master.
+'     end note
+'     ' ------ END : NOTES ------
+
+'     ' --- Resources : Region
+'     prom -up-> node1
+'     elk -up-> node1
+
+'     node1 -right-> node2
+'     node2 -left-> node1
+'     node2 -right-> node3
+'     node3 -left-> node2
+
+'     route53 --> regionLB
+'     regionLB -down-> node1
+'     regionLB -down-> node2
+'     regionLB -down-> node3
+
+'     dockergit2consul -up-> dockeragentkv
+'     dockeragentkv -down-> dockergit2consul
+
+'     ' --- Resources : REGISTRAR
+'     registrar -up-> node1
+'     github_envmanifest -left-> registrar_repo
+
+'     ' --- Resources : KV-SYNC
+'     dockergit2consul --> github_envmanifest
+'     dockeragentkv -left-> regionLB
+
+'     dockeragent_registrar --> registrar_repo
+'     registrar_repo --> dockeragent_registrar
+
+' }
+
+@enduml

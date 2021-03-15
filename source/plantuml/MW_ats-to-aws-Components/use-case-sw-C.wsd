@@ -1,0 +1,38 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+skinparam actorStyle awesome
+
+title Use Case - C
+
+' PARTICIPANTS
+actor :User: as user
+actor :Peer Supporter: as ps
+
+'GIVEN + WHEN + THEN
+ note right of user #LightGrey
+   <b>GIVEN</b> user is
+   experiencing thoughts
+   of suicide
+
+   <b>WHEN</b> user wants
+   to contact a crisis counselor
+
+   <b>THEN</b> user would make
+   contact via Facebook Messenger(CSOM)
+ end note
+
+'WORKFLOW
+rectangle "Communication Flow" as commflow {
+  usecase "Facebook \nMessenger \n(CSOM)" as fm
+  usecase "Queue" as q<<Available>> #LightGreen;line:DarkGreen
+}
+
+'INITIAL CONTACT
+user -->> fm
+fm -->> q
+
+'AVAILABLE
+q -->> ps #DarkGreen;line.dashed : Available
+
+@enduml

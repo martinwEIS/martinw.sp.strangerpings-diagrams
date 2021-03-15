@@ -1,0 +1,190 @@
+' 
+' reference       : http://plantuml.com/state-diagram
+' skinparam       : http://plantuml.com/skinparam
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+hide empty description
+'scale 900 width
+'scale max 1024 width
+
+'---- Title Format Settings ----
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+'---- Object Format Settings ----
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BorderColor Gray
+  BackgroundColor<<afpipeline_bkgd>> YellowGreen/White
+  BackgroundColor<<atlantis_bkgd>> darkorange
+  BackgroundColor<<jenkins_bkgd>> #Red/Yellow
+  BackgroundColor<<aws_bkgd>> LightSteelBlue
+  BackgroundColor<<manifest_bkgd>> #CadetBlue/White
+  BackgroundColor<<github>> #Gray/White
+  BackgroundColor<<pyorc_bkgd>> #SteelBlue/White
+  'FontName Aapex 
+
+}
+
+title platform.af.pipeline to LZ
+
+state "platform.af.pipeline" as afp<<afpipeline_bkgd>> {
+
+    state "CM1 Account Vales" as hcv {
+        
+        state "ECR" as ecrref
+            ecrref : # vars\getEcrCredentialId.groovy
+            ecrref : # vars\getEcrRegistry.groovy        
+            ecrref : # vars\getEcrRegion.groovy
+            ecrref : # resources\ecrSetupPolicy.json
+        State "SharedService" as ssref
+            ssref : # vars\getSharedServiceRegion.groovy
+            ssref : # vars\getSharedServiceCredentialId.groovy        
+        State "AMI" as amiref
+            amiref : # vars\getLatestCentOsAmi.groovy 
+            amiref : # vars\getLatestWindows2016Ami.groovy  **NEW**
+            amiref :
+            amiref :
+            amiref : Update to only use:
+            amiref : Id: <accountName>
+            amiref : AWS:
+            amiref :   Region: <lz_Region> 
+
+    }
+
+    state "Steps Reference: \n af.environment-manifest " as refafenv
+            refafenv : vars\dockerPublishApplication.groovy
+            refafenv : vars\getEnvironmentDefinition.groovy
+            refafenv : vars\withEnvironmentManifest.groovy
+            refafenv : vars\withAwsEnv.groovy
+
+
+
+    state "Step Reference: \n S3" as refs3
+        refs3 : vars\getConsulContainerEnvironmentVariables.groovy
+        refs3 : vars\getConsulS3Uri.groovy
+        refs3 : vars\getConsulS3UriClientCert.groovy
+        refs3 : vars\getConsulS3UriPrefix.groovy
+        refs3 : vars\getConsulS3UriRootCert.groovy
+
+}
+
+state "platform.af.environment-manifest" as afenvmft
+    afenvmft : assemblyLines.yaml
+    afenvmft : environments\cm1\definition.yaml
+    afenvmft : environments\af-consul\definition.yaml
+    note left of afenvmft
+    Update to only use:
+        Id: <accountName>
+        AWS:
+          Region: <lz_Region>     
+    end note
+
+
+state "AWS (CM1)" as aws<<aws_bkgd>> {
+    state CM1_ACCT
+    state ECR
+        ECR : Account 
+        ECR : Region
+    state S3
+        S3 : * LZ Acct = "Shared" 
+        S3 : * Share Across all Accts
+        S3 : * Directory Structure:
+        S3 : - AF/  (root bucket)
+        S3 : -- ADE/sdlc-sbox/consul
+        S3 : -- Deployables/ehost/version/app.zip
+        S3 : -- Installers/telegraf/version/telegraf.nupkg
+    state AMI
+        AMI : Golden-AMI: 
+        AMI :   - Shared-DevQA
+        AMI :   **shared across ALL Accts
+    state "EIS.jfrog" as jfrog
+        jfrog : pyorc (dependencies)
+
+    state "Parameter\n Store" as pstore
+        pstore: All parameters except Acct & Region
+    state "Secrets Manager" as secmngr
+        secmngr : consul cert keys
+}
+
+state "jenkins.eis-platformlive.cloud" as jenkins_platformlive<<<jenkins_bkgd>>
+    jenkins_platformlive: <b> JOB = platform.scaffolding.generator </b>
+
+state github<<github>> {
+
+    state "platform.scaffolding.generator" as scaffolding
+        scaffolding : - Jenkinsfile lists cookiecutter repos
+
+    state "cookiecutter" as cookiecut
+        cookiecut : platform.shared.jsb-cookiecutter
+        cookiecut : platform.shared.node-express-cookiecutter
+        cookiecut : platform.shared.node-ui-cookiecutter
+        cookiecut : platform.shared.dotnet-webapi-cookiecutter
+        cookiecut : platform.shared.cloudformation-cookiecutter
+        cookiecut : platform.shared.python-image-cookiecutter
+        cookiecut : platform.shared.docker-image-cookiecutter
+
+    state medusa 
+        medusa : platform.infrastructure.medusa
+        medusa : - archetypes : "resources/archetypes"
+        medusa : # <b> docker-python-tools-container-v1 </b>
+        medusa : # <b> docker-image-v1  </b>
+
+    state "medusa-data-validator" as medusa_validate
+        medusa_validate: platform.infrastructure.medusa-data-validator
+        medusa_validate: - Application Definition keys: application_metadata.yaml
+        medusa_validate: Jenkinsfile
+        medusa_validate: Application Definition File
+        medusa_validate: Deployment Manifest File
+        medusa_validate: Services Manifest File
+        medusa_validate: Cloudformation Manifest File
+
+}
+
+jenkins_platformlive --> scaffolding
+scaffolding -> cookiecut
+cookiecut --> medusa
+medusa -> medusa_validate
+
+afenvmft --> CM1_ACCT
+refs3 --> S3
+refafenv --> afenvmft
+ssref --> CM1_ACCT
+ecrref --> ECR
+amiref --> AMI
+
+state "Atlantis" as atlas<<atlantis_bkgd>>
+    atlas : LZ IAM Permissions Repo
+    atlas : REPO: platform.infrastructure.atlantis
+
+aws --> atlas
+
+legend bottom right
+    <b> On-Prem AF Jenkins </b>
+    # af-jenkins.epnet.com
+
+    <b> LZ Jenkins Servers </b>
+    # jenkins-sharedservices
+    # jenkins-sspriv
+    # <b> jenkins-ssplatform </b>
+    # jenkins-miscutils
+    # jenkins-af 
+    
+    <b> LZ Accounts </b>
+    1. ehost-devqa 
+    2. ehost-integration
+    3. ehost-live : 
+    4. shared : ECR images, S3, Master Builds
+    5. <b> shared-devqa </b>: Feature Builds, Golden-AMI
+endlegend
+
+
+@enduml

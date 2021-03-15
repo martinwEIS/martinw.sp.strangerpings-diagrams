@@ -1,0 +1,299 @@
+b' 
+' reference       : http://plantuml.com/state-diagram
+' skinparam       : http://plantuml.com/skinparam
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+hide empty description
+'scale 900 width
+'scale max 1024 width
+
+'---- Title Format Settings ----
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+'---- Object Format Settings ----
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BorderColor Black
+  BackgroundColor<<lz_bkgd>> #62B2FF
+  BackgroundColor<<awslz_bkgd>> #62B2FF
+  BackgroundColor<<cloudformation_bkgd>> YellowGreen/White
+  BackgroundColor<<iam_bkgd>> YellowGreen/White
+  BackgroundColor<<s3_bkgd>> #OrangeRed/White
+  BackgroundColor<<r53_bkgd>> #Orange
+  BackgroundColor<<ec2_bkgd>> #Darkorange/White
+  BackgroundColor<<ssm_bkgd>> #LightGray
+  BackgroundColor<<ecr_bkgd>> #SteelBlue/White
+  BackgroundColor<<jenkins_bkgd>> #LightSteelBlue
+  BackgroundColor<<github_bkgd>> #LightSlateGray
+  'FontName Aapex 
+  'AWS Orange : #FF9900 / Blue : #62B2FF
+  'Github : #F4CBB2
+}
+
+
+title F38736 : AF Consul LZ - Cluster Component Diagram
+
+state "<b> AWS </b> \n<b> EIS LZ </b>" as awslz <<awslz_bkgd>>  {
+    
+    
+    ' ------ BEGIN : DEVQA ------
+    state "<b> AWS </b> \n<b> eis-lz-ehost-devqa </b>" as lzdevqa <<lz_bkgd>> {
+
+        
+        state "<b> IAM </b>" as iam <<iam_bkgd>> {
+            iam : <b> ROLES :</b>
+            iam : \t - <b> af-consul-orchestration-role </b> \n\t - <b> af-consul-deployment-role </b> \n\t - <b> af-consul-cluster-ec2-role </b> \n\t - <b> af-consul-kvsync-ec2-role </b>
+        }
+        ' ------ NOTE  ------ 
+        note bottom of iam
+        <b> IAM Roles :</b>
+        * Created using <b> Terraform</b> & applied to AWS via <b> "atlantis-iam" repo </b>
+        ** <b> Repo : platform.infrastructure.atlantis-iam </b>
+        * <b> Roles :</b>
+        # <b> af-consul-orchestration-role </b>
+        ** Main role used by JenkinsFile
+        # <b> af-consul-deployment-role </b>
+        ** Role used for Cloud Formation deployment
+        # <b> af-consul-cluster-ec2-role </b>
+        ** Role assigned to EC2 Cluster nodes
+        # <b> af-consul-kvsync-ec2-role </b>
+        ** Role assigned to EC2 Kv-Sync node
+        end note
+        
+        state "<b> SSM </b>" as ssm_devqa <<ssm_bkgd>> {
+            ssm_devqa : <b> /platform/infrastructure/af/consul/ </b>
+            ssm_devqa : \t - client-key \n\t - server-key \n\t - encryption-key \n\t - master-token \n\t - kv-token \n\t - service-registration-token 
+            ssm_devqa : <b>  /human/platform/infrastructure/ </b> 
+            ssm_devqa : \t - af/consul/kv-sync-ssh-key \n\t - elk/logstash-endpoint
+        }  
+
+        state "<b> Route53 </b>" as route53 <<r53_bkgd>> {
+            route53: <b>Hosted Zone</b> : ehost-devqa.eislz.com
+            route53: <b>A Record</b> : af-consul-ehost-devqa.ehost-devqa.eislz.com
+        }
+
+
+
+        state "<b>Cloud Formation </b>\n <b> Af-Consul Stack </b>\n\n <b>IAM Profile : af-consul-deployment-role</b>\n ( af-consul-stack-ehost-devqa )" as cloudform <<cloudformation_bkgd>> {
+
+            state "<b> Nested </b> \n <b> Cluster Stack </b> \n\n ( af-consul-stack-ehost-devqa-ClusterStack )" as clusterstk <<cloudformation_bkgd>> {
+                state "<b>Load Balancing</b>" as lb <<ec2_bkgd>> {
+                    state "<b> Load Balancers</b> " as elb {
+                        elb: DNS Name : internal-af-consul-ehost-devqa-****.com
+                        elb: AZ : us-east-1a, 1b, 1d
+                        elb: Listener : HTTP port 80
+                    }
+                    state "<b>Target Group</b>" as targetgrp {
+                        targetgrp : Load Balancer : af-consul-ehost-devqa
+                        targetgrp : Targets : consul-cluster 1 - 3
+
+                        state "<b>EC2</b> \n <b> Consul-Cluster:</b> \n <b>Node 1 - 3 </b>" as ec3cluster <<ec2_bkgd>> {
+    
+                        }
+                    }
+
+                    elb -> targetgrp
+                }
+
+                state "<b>Auto Scaling</b>" as autoscale <<ec2_bkgd>> {
+
+                    state "<b> Auto Scaling Groups</b>" as autoscalegrp {
+                        autoscalegrp : <b> STACK </b>
+                        autoscalegrp : Launch Config : af-consul-cluster-ehost-devqa
+                        autoscalegrp : AZ : us-east-1a, 1b, 1d
+                    }
+                    state "<b> Launch Configuration</b>" as autolaunch {
+                        autolaunch : <b> EC2 </b>
+                        autolaunch : <b>IAM Profile \t  : af-consul-cluster-ec2-role </b>
+                        autolaunch : Instance type  : t2.micro
+                        autolaunch : User Data  \t  : <Bash Script>
+                    }
+
+                    autoscalegrp -down-> autolaunch
+                }
+
+                autolaunch --> elb
+            }
+
+            state "<b>Nested</b> \n<b>Kv-Sync Stack</b>\n\n ( af-consul-stack-ehost-devqa-KvSyncStack )" as kvsyncstk <<cloudformation_bkgd>> {
+                
+                state "<b>Auto Scaling</b>" as kvautoscale <<ec2_bkgd>> {
+                    state "<b> Launch Configuration </b>" as kvautolaunch {
+                        kvautolaunch : <b> EC2 </b>
+                        kvautolaunch : <b> IAM Profile \t  : af-consul-kvsync-ec2-role </b>
+                        kvautolaunch : Instance type  : t2.micro
+                        kvautolaunch : User Data  \t  : <Bash Script>
+
+                    }
+                    state "<b> Auto Scaling Groups </b>" as kvautoscalegrp {
+                        kvautoscalegrp : <b> STACK </b>
+                        kvautoscalegrp : Launch Configuration : af-consul-kv-sync-ehost-devqa
+                        kvautoscalegrp : \t\t\t\t AZ : us-east-1a, 1b, 1d
+
+                    }
+
+                    state "<b>EC2</b> \n <b> Kv-Sync:</b> \n <b>Node 1 </b>" as ec2kvsync <<ec2_bkgd>> {
+
+                    }
+
+                    state "<b>EFS</b> \n(Elastic File System)" as efs {
+                        efs : Mount Name : fs-c2177f41
+                        efs : AZ : us-east-1a, 1b, 1d
+                    }
+
+                    kvautoscalegrp --> kvautolaunch
+                    kvautolaunch --> ec2kvsync
+                    ec2kvsync -right-> efs
+
+                }
+            }
+
+        }
+
+    }        
+    ' ------ END : DEVQA ------
+
+
+    ' ------ BEGIN : GITHUB ------
+    state "<b> GitHub </b> \n(Af-Consul Docker Repos)" as github_docker <<github_bkgd>> {
+        state "<b> platform.af.docker-git2consul </b> \n <b>platform.af.docker-consul </b>  \n <b>platform.af.docker-consul-agent</b>  \n <b>platform.af.registrar</b> "
+    }
+
+    state "<b> GitHub </b>  \n(Environment Manifest)" as github_envmanifest <<github_bkgd>> {
+
+            state "<b> platform.af.environment-manifest </b>" as envmanifest
+        }
+    ' ------ END : GITHUB ------ 
+
+
+    ' ------ BEGIN : SHARED ------ 
+    state "<b>AWS</b> \n <b> eis-lz-shared </b> " as lzshared <<lz_bkgd>> {
+
+        state "<b> Jenkins </b> \n <b>( jenkins-ssplatform2.ss.eislz.com )</b>" as jenkins_ssplatform2 <<jenkins_bkgd>> {
+            state "<b> Af-Consul </b>\n <b>( Deploy/Update )</b>" as afconsul {
+
+                state "<b> platform.af.consul </b>" as afconsul_repo {
+
+                    state "<b> JenkinsFile </b>" as jenkinsfile
+                }
+
+                state "<b> platform.af.pipeline </b>" as afpipeline
+            }
+        }
+        ' ------ NOTE  ------ 
+        note bottom of afconsul
+        <b>Af-Consul Orchestration Deployment :</b> 
+        
+        <b>Af-Consul (repo) :</b>        
+        * <b>JenkinsFile :</b>
+        ** Orchestrates deploy/update
+        * <b> IAM Profile : af-consul-orchestration-role </b>
+        * <b>Stack-Templates :</b>
+        ** <b>main.yaml :</b> Primary Stack
+        *** <b>consul-cluster.yaml :</b> Nested Stack
+        *** <b>kv-sync.yaml :</b> Nested Stack
+
+        * <b>Environment Manifest (Repo) :</b>
+        ** <b>assemblyLines.yaml :</b> AWS accounts for deployment
+        ** <b>definition.yaml :</b> AWS account config values
+        *** AccountId, Region, Profile, VPC, etc..
+        end note
+
+
+
+        state "<b> platform.af.pipeline </b> " as afpipeline
+
+        state "<b> ECR </b> " as ecr <<ecr_bkgd>> {
+            ecr : <b> ref1.5/release/platform/af/ </b>
+            ecr : \t - docker-consul \n\t - docker-consul-agent \n\t - docker-git2consul \n\t - registrar
+        }
+        
+        state "<b> SSM </b> " as ssm_shared <<ssm_bkgd>> {
+            ssm_shared : <b> \n <b> /platform/infrastructure/centos-golden-ami/latest </b>
+
+            state "<b> AMI </b>" as ami <<ec2_bkgd>> {
+            ami : <b> centos-golden-ami </b>
+            }
+        }
+
+        state "<b> S3 </b>" as s3 <<s3_bkgd>> {
+            s3: <b> Bucket : eis-lz-shared-automation-factory</b>
+            s3: \t <b>-- consul/</b>
+            s3: \t\t - Stack-templates \n\t\t - telegraf.conf \n\t\t - is_consul_leader.sh \n\t\t - client.cer \n\t\t - root.cer \n\t\t - service.cer
+        }
+               
+    }
+    ' ------ END : SHARED ------
+
+    ' ------ BEGIN : NOTES ------
+    note bottom of envmanifest
+        <b>Environment Manifest :</b>
+
+        <b>assemblyLines.yaml</b>
+        * List of ehost assembly lines for deployment:
+        ## <b>ehost-devqa-sandbox</b>
+        ## <b>ehost-devqa</b>
+        ## <b>ehost-integration</b>
+        ## <b>ehost-live-pi</b>
+        ## <b>ehost-live-sigma</b>
+        <b>Environments (directory)</b>
+        * <b> AWS Environments : </b>
+        ** <b>Consul Data</b> :  KVP and BaseEnvironment data
+        ** <b>definition.yaml</b> : AWS config (Region, Profile, etc..)
+    end note
+
+    note left of github_docker
+        <b>Af-Consul Docker Images :</b>
+
+        * Docker images used for Af-Consul
+        * Images stored in ECR (eis-lz-shared)
+        * <b>Build:</b>
+        ** <b>Medusa Archetype(s)</b>
+        *** <b>docker-image-v1</b>
+        *** <b>docker-python-tools-container-v1</b>         
+    end note
+
+    note left of ssm_shared
+        <b>EC2 AMI :</b>
+
+        <b>Cluster EC2's AMI:</b>
+        * <b>centos-golden-ami</b>
+        * maintained by EPA
+        * SSM parameter points to LATEST
+    end note
+
+    ' ------ END : NOTES ------
+
+
+' --- Resources : for Cloud formation
+cloudform -down-> ssm_devqa
+cloudform --> iam
+cloudform --> route53
+
+ecr -up-> ec2kvsync
+ecr -up-> ec3cluster
+s3 -up-> ec3cluster
+
+' --- Resources : lzshared connections
+afconsul_repo -up-> s3
+afconsul_repo -down-> envmanifest
+envmanifest -up-> afconsul_repo
+afconsul_repo --> afpipeline
+afpipeline --> afconsul_repo
+
+afconsul --> ssm_devqa
+
+github_docker -up-> ecr
+
+}
+
+@enduml

@@ -1,0 +1,96 @@
+
+'https://crashedmind.github.io/PlantUMLHitchhikersGuide/
+
+'----------------
+' MATERIAL - listsprites
+'----------------
+@startuml
+
+!include <material/common.puml>
+!include <material/arrow_down_bold_box_outline.puml>
+!include <material/account.puml>
+!include <material/application.puml>
+!include <material/coffee.puml>
+
+' bulletin_board.puml
+' bing.puml
+' calendar.puml
+' call_made.puml
+' call_missed.puml
+' chart_bubble.puml
+
+listsprites
+@enduml
+
+'----------------
+' SPRITES - listsprites
+'----------------
+' @startuml
+
+' !define osaPuml https://raw.githubusercontent.com/Crashedmind/PlantUML-opensecurityarchitecture2-icons/master
+' !include osaPuml/Common.puml
+' !include osaPuml/User/all.puml
+
+' listsprites
+' @enduml
+
+
+'----------------
+' SHAPES - MATERIAL ICONS
+'----------------
+' @startuml
+' hide stereotype
+
+' !include <material/common>
+' !include <material/gmail.puml>
+
+' stack stackg as "stack" #aliceblue;line:blue;line.dotted;text:blue {
+
+'     MA_GMAIL(#YellowGreen,2,gmail_3,storage,"my gmail"){
+'     }
+
+' }
+'SHAPES
+' artifact artifact
+' card card
+' cloud cloud
+' component component
+' database database
+' file file
+' folder folder
+' frame frame
+' interface interface
+' node node
+' package package
+' queue queue
+' rectangle rectangle
+' stack stack
+' storage storage
+
+@enduml
+
+
+'----------------
+' FONTS - listfont
+'----------------
+' @startuml
+' '
+' listfont
+'----------------
+' FONTS TO TRY
+'----------------
+'bauhaus 93
+'calibri
+'gadugi
+'lucida sans
+'tahoma
+
+' @enduml
+
+
+'----------------
+' COLORS - colors
+'----------------
+' @startuml
+' colors
+' @enduml

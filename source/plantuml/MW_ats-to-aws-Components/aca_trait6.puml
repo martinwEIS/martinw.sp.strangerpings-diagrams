@@ -1,0 +1,114 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+!include <logos/flask.puml>
+!include <logos/Facebook.puml>
+!include <elastic/logstash/logstash.puml>
+!include <elastic/common>
+!include <material/common>
+!include <material/folder_move>
+!include <material/gmail.puml>
+!include <material/facebook.puml>
+!include <material/facebook_box.puml>
+!include <material/facebook_messenger.puml>
+!include <material/account_outline.puml>
+
+'Standard Libary icon skinparam settings
+skinparam agentBackgroundColor white
+skinparam nodeBackgroundColor white
+
+skinparam cardBorderColor none
+skinparam cardBackgroundColor none
+skinparam cardShadowing true
+
+skinparam UsecaseFontName cabr
+
+
+skinparam roundcorner 30
+skinparam StorageBorderColor white
+
+skinparam actorStyle awesome
+' skinparam actorStyle hollow
+skinparam Shadowing false
+
+hide stereotype
+
+title ACA - Trait 6
+
+' PARTICIPANTS
+LOGSTASH(logstash)
+
+MA_GMAIL(#AliceBlue,2,gmail_3,storage,"my gmail"){
+}
+
+MA_FOLDER_MOVE(Red, 1, dir, rectangle, "A label") {
+}
+
+MA_FACEBOOK(#CadetBlue,2,facebook1,storage,"facebook"){
+}
+
+MA_FACEBOOK_BOX(#CadetBlue,2,facebook_box,storage,"facebook box"){
+}
+
+MA_FACEBOOK_MESSENGER(#CadetBlue,2,facebook_msgr,storage,"facebook messenger"){
+}
+
+MA_ACCOUNT_OUTLINE(#CadetBlue,2,acct_outline,storage,"account outline"){
+}
+
+
+(<$facebook>) #white;line:White;line.dashed;text:green
+
+
+actor :User: as user
+actor/ :Peer Supporter: as ps
+
+usecase "<$ma_gmail>\nGmail" as gmail #white;line:White;line.dashed;text:green
+
+
+
+usecase "<$facebook>\nFacebook \nMessenger" as facebook
+usecase "This is what my \n inner child is saying" as ic #WhiteSmoke;line.dotted
+usecase "This is also what\n my inner child is saying" as ic2
+usecase "What Im currently thinking" as current2 #palegreen;line:green;line.dashed;text:green
+
+(test boarder) as current #palegreen;line:green;line.dashed;text:green
+
+
+' card "<size:42><&key></size>"
+' card "<size:42><&globe></size>"
+' card "<size:42><&fire></size>"
+' card "<size:42><&command></size>"
+' card "<size:42><&comment-square></size>"
+' card "<size:42><&chat></size>"
+' card "<size:42><&people></size>"
+' card "<size:42><&loop-circular></size>"
+
+'GIVEN + WHEN + THEN
+ note left of user #White
+   <b>GIVEN</b> a peer supporter
+
+ end note
+
+'WORKFLOW
+rectangle "Communication\n Flow" as commflow #white;line:LightGray;line.dotted;text:blue {
+  usecase "Facebook \nMessenger" as fm #aliceblue;line:white;line.dotted;text:blue
+}
+
+rectangle "Communication\n Flow" as commflow2 #aliceblue;line:LightGray;line.dotted;text:blue {
+  usecase "Facebook \nMessenger" as fm2 #white;line:white;line.dotted;text:blue
+}
+
+'AVAILABLE
+' fm <-- ps #DarkGreen;line.dashed : 1.1 \nPS Initiate \nmessage
+
+'INITIAL CONTACT
+' user <-- fm #DarkGreen;line.dashed : 1.2 \nUser accepts\n message request
+
+user ..up..> ic #DarkGreen;line.dotted
+user ...up...|> ic2 #DarkGreen;line.dotted
+user ->> current #DarkGreen
+current ->> current2
+
+
+@enduml

@@ -1,0 +1,54 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+'skinparam actorStyle awesome
+
+title Use Case - A
+
+'PARTICIPANTS
+actor :User: as user
+actor :Crisis Counselor: as cc
+
+'GIVEN + WHEN + THEN
+ note right of user #LightGrey
+   <b>GIVEN</b> User contacts
+   a crisis counselor via
+   Facebook Messenger(CSOM)
+
+   <b>WHEN</b> User has to wait
+   longer than 120 seconds
+
+   <b>THEN</b> An automated message
+   will be displayed about:
+     * Extended wait
+     * Dialing 911 if an emergency
+ end note
+
+'WORKFLOW
+rectangle "Communication Flow" as commflow {
+  usecase "Facebook \nMessenger \n(CSOM)" as fm
+  usecase "Queue" as q<<WAIT \n120 seconds>> #pink;line:red;line.bold;text:red
+
+  rectangle "Message Flow" as msgflow {
+    usecase "Automated Message \nQueue" as am #aliceblue;line:blue
+    usecase message #aliceblue;line:blue as "
+      MESSAGE
+      ==
+      Extended wait
+      Dialing 911
+      If an emergency"
+  }
+}
+
+'INITIAL CONTACT
+user -down-> fm : initial \ncontact
+fm -->> q
+q -->> cc #red;line.dashed : Not Available
+
+'WAIT 120 SECONDS
+q -right-> am #blue;line.dotted
+am -up-> message #blue;line.dotted
+message -left-> fm #blue;line.dotted;text:blue : msg
+fm --> user #blue;line.dotted;text:blue : msg
+
+@enduml

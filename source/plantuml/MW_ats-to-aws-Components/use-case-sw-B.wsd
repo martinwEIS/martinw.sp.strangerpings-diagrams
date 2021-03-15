@@ -1,0 +1,55 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+' skinparam actorStyle awesome
+
+title Use Case - B
+
+' PARTICIPANTS
+actor :User: as user
+actor :Peer Supporter: as ps
+
+'GIVEN + WHEN + THEN
+ note right of user #LightGrey
+   <b>GIVEN</b> User contacts
+   a peer supporter via
+   Facebook Messenger
+
+   <b>WHEN</b> Peer supporter
+   is not available
+
+   <b>THEN</b> Message will be displayed
+   to use (CSOM) to contact
+   Crisis Counselor
+ end note
+
+'WORKFLOW
+rectangle "Communication Flow" as commflow {
+  usecase "Facebook \nMessenger \n(CSOM)" as fm
+  usecase "Not Available" as q #pink;line:red;line.bold;text:red
+
+  rectangle "Message Flow" as msgflow {
+    usecase "Automated Message \nQueue" as am #aliceblue;line:blue
+    usecase message #aliceblue;line:blue as "
+      MESSAGE
+      ==
+      Peer Supporter is
+      Not Available
+      Use Facebook Messenger
+      to contact a
+      Crisis Counselor"
+  }
+}
+
+'INITIAL CONTACT
+user -->> fm : initial \ncontact
+fm -->> q
+q -->> ps #red;line.dashed : Not Available
+
+'NOT AVAILABLE
+q -right-> am #blue;line.dotted
+am -up-> message #blue;line.dotted
+message -left-> fm #blue;line.dotted;text:blue : msg
+fm -->> user #blue;line.dotted;text:blue : msg
+
+@enduml

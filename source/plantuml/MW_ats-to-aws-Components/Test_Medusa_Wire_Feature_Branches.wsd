@@ -1,0 +1,89 @@
+@startuml
+
+
+
+' Push 1st
+' ats-test-app : branch
+' https://jenkins-agena.ss.eislz.com/job/platform.af.ats-test-app/
+' feature/stevefbtest
+' ---------------------------------------------------------
+
+
+' Push 2nd
+' medusa proper:  branch
+' https://jenkins-ssplatform.ss.eislz.com/job/platform.infrastructure.medusa/job/feature%252Fstevefbtest/3/consoleFull
+' feature/stevefbtest
+' update:
+' C:\Users\martinw\Projects\Medusa\platform.infrastructure.medusa\resources\archetypes\af-dotnet-service-v1.yaml
+' ---------------------------------------------------------
+
+
+' Push 3rd
+' medusa-plugin-ats :
+' https://jenkins-ssplatform.ss.eislz.com/job/platform.infrastructure.medusa-plugin-ats/
+' use my own
+' update:
+' C:\Users\martinw\Projects\ATS-GitHub\platform.af.ats-test-app\Jenkinsfile
+
+
+state "platform.af.ats-test-app" as testapp {
+    state "Update files" as upf2
+        upf2: Jenkinsfile
+    }
+
+state "platform.infrastructure.medusa" as infra {
+    state "Update files" as upf
+        upf: af-dotnet-service-v1.yaml
+    }
+
+state "platform.infrastructure.medusa-plugin-ats"
+
+
+state AGENA
+
+state "RUNTIME" as RUNTIME {
+
+
+    state entryRuntime <<expansionInput>>
+
+
+
+    state "ATS Quality Gate" as atsQualityGate {
+        state entryQualityGate <<expansionInput>>
+        state qualityGateApp : platform.af.ats-qualitygate
+        state exitQualityGate <<outputPin>>
+    }
+
+
+    state "ci-pipeline" as ciPipeline {
+        state entryCiPipeline <<inputPin>>
+        state callatspipeline
+        state exitCiPipeline <<outputPin>>
+
+    }
+
+    state ".Net Application" as dotNetApp {
+        state entryDotNet <<inputPin>>
+        state Jennkinsfile
+        state exitDotNet <<outputPin>>
+    }
+
+    exitDotNet --> entryCiPipeline
+    exitCiPipeline --> entryQualityGate
+
+
+    }
+
+
+[*] --> AGENA
+AGENA --> entryRuntime
+
+
+
+
+
+
+
+
+
+@enduml

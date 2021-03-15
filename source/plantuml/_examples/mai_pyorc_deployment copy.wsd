@@ -1,0 +1,69 @@
+' reference       : http://plantuml.com/deployment-diagram
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+skinparam rectangle {
+	roundCorner 25
+    'BackgroundColor DarkSeaGreen
+    BorderColor DarkSlateGray
+
+    BackgroundColor<< PyOrc >> Green/Yellow
+    BorderColor<< PyOrc >> DarkSlateGray
+
+    BackgroundColor<< HeatTemplate >> Red/Yellow
+    BorderColor<< HeatTemplate >> DarkSlateGray
+    
+}
+
+rectangle "AWS" as aws {
+    rectangle "Parameter Store \nPEM key:value" as param_store
+}
+
+rectangle "AF-JENKINS" as af_jenkins
+
+rectangle "CDF_PIPELINE"  {
+	rectangle "cdfDeploySingle"  as cdfsingle {
+        rectangle "LINE #149:<b> infManifestPath = downloadManifest()</b>" as infManPath
+        
+        rectangle "LINE #163:<b> heat-stack-create -i $infManifestPath </b>" as heatstack
+
+    infManPath -up-> heatstack
+
+    }
+    rectangle "<b>downloadManifest()</b> \n(ADD LINE 117) heatEnvSetCmd += 'secrets_pem_key'" as download_manifest
+
+    rectangle "<b>get_secrets_pem_key()</b> \n get_secrets_pem_key(ade,service-name)" as get_pem
+
+
+        
+}
+
+rectangle "onprem-af-pyorc" << PyOrc >> as pyorc {
+    rectangle "withPyOrc"  as pyo
+
+	rectangle "<b> heat-stack-create </b>" <<HeatTemplate>> as heat_create_tmplt
+    infManPath -> download_manifest
+    download_manifest -down-> get_pem
+
+}
+
+rectangle "Source_Application"  {
+	rectangle "Inf_Manifest"  as Infman
+'    note right
+'     This note is on several
+'     //lines// and can
+'     contain <b>HTML</b>
+'     ====
+'     * Calling the method ""foo()"" is prohibited
+'    end note
+} 
+
+get_pem -down-> af_jenkins
+af_jenkins -> param_store
+download_manifest -up-> Infman
+
+
+@enduml

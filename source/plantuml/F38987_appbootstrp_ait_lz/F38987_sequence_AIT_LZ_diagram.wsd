@@ -1,0 +1,42 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #EEEBDC
+
+skinparam sequence {
+	ArrowColor #0e477d
+	ActorBorderColor DeepSkyBlue
+	LifeLineBorderColor blue
+	LifeLineBackgroundColor #A9DCDF
+	
+	ParticipantBorderColor LightSteelBlue
+	ParticipantBackgroundColor Gray
+	ParticipantFontSize 17
+	ParticipantFontColor White
+}
+
+    ' header pyorc_aws_sequence_v3.wsd
+    footer Page %page% of %lastpage%
+
+    title F38987 : Deploy AIT in EIS Landing Zone
+
+    participant "Create Instance" as create_ec2
+    participant "Install Software" as install_sftw
+    participant "Create Image" as create_img
+    participant "Create Instance from Image" as create_ec2_img
+    participant "Validate Software on Instance" as validate_sftw
+    participant "Publish Image" as pub_image
+
+
+    create_ec2 -> install_sftw
+    install_sftw -> create_img++
+    create_img -> create_ec2_img
+    create_ec2_img -> validate_sftw++
+    validate_sftw --> create_img--
+    create_img -> pub_image--
+
+@enduml

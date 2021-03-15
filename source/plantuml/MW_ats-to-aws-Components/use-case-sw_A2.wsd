@@ -1,0 +1,50 @@
+
+@startuml
+
+skinparam actorStyle awesome
+'default
+' top to bottom direction
+'left to right direction
+
+
+
+title Use Case - A
+
+actor :User: as user
+actor :Crisis Counselor: as cc
+usecase "Facebook Messenger \n(CSOM)" as fm
+usecase "Queue" as q<<120 second Wait>> #pink;line:red;line.bold;text:red
+usecase "Automated Message" as am #aliceblue;line:blue
+usecase message #aliceblue;line:blue as "
+Displayed Message :
+==
+Extended wait
+Dialing 911
+If an emergency"
+
+note "IF User waits\n longer than\n 120 seconds" as when
+
+
+' note top of q
+'   IF user has to wait
+'   longer than
+'   120 seconds
+' end note
+
+user -down-> fm #line:green;line.bold
+fm --> q #line:green;line.bold
+
+q -right-> am #blue;line.bold
+q -down-> cc #red;line.dashed
+
+am -up-> message #blue;line.bold
+message -left-> fm #blue;line.dotted : msg
+fm -up-> user #blue;line.dotted : msg
+
+
+' fm .. when #blue;line.bold
+' when .. q #blue;line.bold
+
+
+
+@enduml

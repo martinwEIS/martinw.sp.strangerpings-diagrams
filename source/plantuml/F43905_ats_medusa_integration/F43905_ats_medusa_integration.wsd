@@ -1,0 +1,165 @@
+@startuml
+
+'hide footbox
+skinparam ParticipantPadding 50
+skinparam BoxPadding 20
+
+skinparam roundcorner 20
+skinparam backgroundColor #FFFFFF
+
+skinparam sequence {
+	ArrowColor #000000
+	ActorBorderColor #000000
+	LifeLineBorderColor LightSteelBlue
+    LifeLineBackgroundColor #FFFFFF
+	' LifeLineBackgroundColor #A9DCDF
+    ' LifeLineBackgroundColor LightSteelBlue
+
+    GroupBackgroundColor #FFFFFF
+    GroupBodyBackgroundColor #FFFFFF
+    GroupBorderColor gray
+    'GroupBorderColor Blue
+
+	ParticipantBorderColor #000000
+    ' ParticipantBackgroundColor gray
+	' ParticipantBackgroundColor #A4CCAC
+    ' ParticipantBackgroundColor #FFFFFF
+	ParticipantFontSize 17
+	ParticipantFontColor #000000
+}
+
+    header F43905_ats_medusa_integration.wsd
+    footer Page %page% of %lastpage%
+
+    title F43905 : ATS Medusa Integration
+
+    participant "Jenkins" as jenkins
+    participant "Medusa" as medusa
+    participant "Medusa Addon" as addon
+    participant "Manifest" as manifest
+    participant "SSM" as ssm
+    participant "S3" as s3
+    participant "Artifactory" as artifactory
+    participant "ATS QualityGate" as qualitygate
+    participant "ATS Scheduler (AWS)" as aws_scheduler
+    participant "ATS Scheduler (onprem)" as onprem_scheduler
+    participant "ATS Testrun" as testrun
+    database "MSSQL Velocity Cloud\n(AWS)" as aws_atsdatabase
+    database "MSSQL P9\n(onprem)" as onprem_atsdatabase
+
+== Start : ATS Medusa Integration ==
+    group "Feature F43905"
+        jenkins -> medusa++
+            rnote right of jenkins #ADBBD2
+                <b>Execute Medusa Pipeline :</b>
+                * af-dotnet-service-v1 archetype
+            end note
+        medusa -> addon++
+            rnote right of addon #ADBBD2
+                <b>Start:</b>
+                * Required step for executing PAL tests
+            end note
+        addon -> manifest++
+            rnote right of manifest #ADBBD2
+                <b>Fetch :</b>
+                * Service name
+                * Tags (AWS)
+            end note
+        addon <- manifest--
+        addon -> ssm++
+            rnote right of ssm #ADBBD2
+                <b>Fetch :</b>
+                * Get latest test client image version (AWS | onprem)
+                * Get latest Qualitygate version
+            end note
+        addon <-- ssm--
+        addon -> s3++
+            rnote right of s3 #ADBBD2
+                <b>Fetch :</b>
+                * Download Qualitygate executable
+            end note
+        addon <-- s3--
+        addon -> artifactory++
+            rnote right of artifactory #ADBBD2
+                <b>Fetch :</b>
+                * Packageinfo.xml
+                  (contains PAL path)
+            end note
+        addon <-- artifactory--
+        addon -> qualitygate++ : <b>Start Testrun</b>
+            rnote right of addon #ADBBD2
+                <b>Pass parameters :</b>
+                * ATS Scheduler name (AWS | onprem)
+                * Service name
+                * Test job file
+                * Test client image name
+                * SSRS Report hostname (AWS | onprem)
+            end note
+        qualitygate -> ssm++
+            rnote right of ssm #ADBBD2
+                <b>Fetch :</b>
+                * Get DB connection string (secret) (AWS | onprem)
+                * Get TransactionLogger connection string (secret) (onprem)
+            end note
+        qualitygate <-- ssm--
+        qualitygate -> aws_scheduler++ : For <b>AWS</b>
+            rnote right of qualitygate #ADBBD2
+                <b>Setup :</b>
+                * Update test job w/test client image
+                * Update test job  w/AWS tags
+                * Update test job w/TransactionLogger (secret)
+                * Validate test job XML
+                * Invoke ATS Scheduler
+                * Poll ATS Scheduler for status
+            end note
+        aws_scheduler -> testrun++ : Create test infrastructure using CloudFormation
+             rnote right of testrun #ADBBD2
+                <b>Execute :</b>
+                * Run automated PAL tests (AWS)
+                * Send test results to the MSSQL database
+            end note
+        testrun -> aws_atsdatabase++
+            rnote right of aws_atsdatabase #ADBBD2
+                <b>Create :</b>
+                * SSRS test report of the Testrun
+            end note
+        testrun <-- aws_atsdatabase--
+        aws_scheduler <-- testrun--
+        qualitygate <-- aws_scheduler--
+        qualitygate -> onprem_scheduler++ : For <b>onprem</b>
+            rnote right of qualitygate #ADBBD2
+                <b>Setup :</b>
+                * Update test job w/test client image
+                * Update test job w/TransactionLogger (secret)
+                * Validate test job XML
+                * Invoke ATS Scheduler
+                * Poll ATS Scheduler for status
+            end note
+        onprem_scheduler -> testrun++ : Create test infrastructure using P9
+            rnote right of testrun #ADBBD2
+                <b>Execute :</b>
+                * Run automated PAL tests (onprem)
+                * Send test results to the MSSQL database
+            end note
+        testrun -> onprem_atsdatabase++
+            rnote right of onprem_atsdatabase #ADBBD2
+                <b>Create :</b>
+                * SSRS test report of the Testrun
+            end note
+        testrun <-- onprem_atsdatabase--
+        onprem_scheduler <-- testrun--
+        qualitygate <-- onprem_scheduler--
+        addon <-- qualitygate-- : <b>End Testrun</b>
+            rnote right of addon #ADBBD2
+                <b>Status:</b>
+                * Testrun return code (pass | fail)
+                * Link to SSRS test report
+            end note
+            rnote right of addon #ADBBD2
+                <b>Prompt:</b>
+                * Allow manual override if tests fail
+            end note
+        medusa <-- addon--
+        jenkins <-- medusa--
+    end
+@enduml

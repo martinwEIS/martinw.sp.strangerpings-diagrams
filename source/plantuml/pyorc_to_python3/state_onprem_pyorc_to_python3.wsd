@@ -1,0 +1,107 @@
+' 
+' reference       : http://plantuml.com/state-diagram
+' skinparam       : http://plantuml.com/skinparam
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+hide empty description
+'scale 900 width
+'scale max 1024 width
+
+'---- Title Format Settings ----
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+'---- Object Format Settings ----
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BorderColor Gray
+  BackgroundColor<<docker_bkgd>> lightgreen/White
+  BackgroundColor<<ait_bkgd>> darkorange
+  BackgroundColor<<mai_bkgd>> #Yellow
+  BackgroundColor<<jenkins_file>> LightSteelBlue
+  BackgroundColor<<pyorc_bkgd>> #CadetBlue/White
+  BackgroundColor<<telemetry_bkgd>> #Gray/White
+  BackgroundColor<<pyorc_bkgd>> #SteelBlue/White
+  'FontName Aapex 
+
+}
+
+title State Diagram:Pyorc & Python3 Update
+
+state "cdf_docker" as cdfdoc <<docker_bkgd>> {
+    cdfdoc : * pyorchestration
+    cdfdoc :  ** Python2
+}
+
+state "ait_docker_image" as aitdoc <<docker_bkgd>>{
+    aitdoc : * Python2
+    aitdoc : * Python3
+}
+
+state "af_consul_docker" as afconsul <<docker_bkgd>>
+    afconsul: * Stash/afj
+    afconsul: ** Python2 or Python3 ??
+
+
+state "Pyorc" as pyorc <<pyorc_bkgd>> {
+    pyorc : * Python2
+}
+
+state "Mai" as mai <<mai_bkgd>> {
+    mai : * Python2
+}
+
+state "Windows2016WEB AIT" as win2016ait <<ait_bkgd>>
+
+state "Centos7WEB AIT" as centos7ait <<ait_bkgd>>
+
+state "Windows2012WEB AIT" as win2012ait <<ait_bkgd>>
+
+state "On-Prem Artifactory" as opArtifact {
+    
+    state "pyorchestration" as pyorcArtifact <<pyorc_bkgd>> {
+        pyorcArtifact: * adapt-py-release/pyorchestration
+        pyorcArtifact: ** Python2
+    }
+
+    state "pycdf" as maipycdf <<mai_bkgd>> {
+        maipycdf : * pycdf (mailib)
+        maipycdf : * mai
+    }
+
+}
+
+state "ci-pipeline" as ci 
+    ci : withPyorc
+
+ci --> cdfdoc
+ci -down-> pyorcArtifact
+
+
+afconsul --> cdfdoc
+
+aitdoc --> win2016ait
+aitdoc --> centos7ait
+aitdoc --> win2012ait
+aitdoc --> pyorcArtifact
+
+mai -up-> maipycdf
+
+pyorc --> cdfdoc
+pyorc -> pyorcArtifact
+
+
+
+cdfdoc --> pyorcArtifact
+
+
+
+@enduml

@@ -1,0 +1,202 @@
+b' 
+' reference       : http://plantuml.com/state-diagram
+' skinparam       : http://plantuml.com/skinparam
+' common commands : http://plantuml.com/commons
+' color codes     : http://plantuml.com/color
+' arror direction : http://plantuml.com/component-diagram
+' notes           : http://plantuml.com/state-diagram
+'--------------------------------------
+@startuml
+hide empty description
+'scale 900 width
+'scale max 1024 width
+
+'---- Title Format Settings ----
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 3
+skinparam titleBorderColor DimGray
+skinparam titleBackgroundColor business
+skinparam titleFontSize 25
+
+'---- Object Format Settings ----
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BorderColor Black
+  BackgroundColor<<awslz_bkgd>> #62B2FF
+  BackgroundColor<<lz_bkgd>> #62B2FF
+  BackgroundColor<<cloudformation_bkgd>> YellowGreen/White
+  BackgroundColor<<iam_bkgd>> YellowGreen/White
+  BackgroundColor<<s3_bkgd>> #OrangeRed
+  BackgroundColor<<r53_bkgd>> #Orange
+  BackgroundColor<<ec2_bkgd>> #Darkorange/White
+  BackgroundColor<<ssm_bkgd>> #LightGray
+  BackgroundColor<<ecr_bkgd>> #SteelBlue/White
+  BackgroundColor<<prom_bkgd>> #OrangeRed
+  BackgroundColor<<elk_bkgd>> #DarkGoldenRod
+  BackgroundColor<<jenkins_bkgd>> #LightSteelBlue
+  BackgroundColor<<github_bkgd>> #LightSlateGray
+  BackgroundColor<<leader_bkgd>> #Tomato
+  'FontName Aapex 
+  'AWS Orange : #FF9900 / Blue : #62B2FF
+  'Github : #F4CBB2
+
+}
+
+
+title F38736 : AF Consul LZ - Cluster Data Flow
+
+state "<b> AWS </b>\n<b> EIS-LZ-EHOST-DEVQA</b>" as awslz <<awslz_bkgd>>  {
+    
+    ' ------ START : REGION ------
+    state "<b> REGION </b> \n<b> us-east-1 </b> " as region <<lz_bkgd>> {
+
+        state "<b> Route53 </b>" as route53 <<r53_bkgd>> {
+            route53: <b>Hosted Zone</b> : ehost-devqa.eislz.com
+            route53: <b>A Record</b> : af-consul-ehost-devqa.ehost-devqa.eislz.com
+        }
+
+        state "<b> Load Balancer\n <b> af-consul-ehost-devqa  </b>" as regionLB <<ec2_bkgd>>
+
+        state "<b> AZ1 </b>" as az1 <<lz_bkgd>> {
+
+            state "<b>Consul Cluster:</b>\n<b>Node 1</b>" as node1 <<ec2_bkgd>>{
+                node1 : UserData:
+                node1 : \t - Telegraf
+                node1 : \t - Filebeat
+                state "docker-consul-agent" as dockeragent1 
+            }
+
+            note "<b> CLUSTER LEADER </b>\n Quorum maintained by Consul\n gossip/consensus\n among 3 nodes" as N1 #Red
+
+            N1 -right-> node1
+
+        }
+
+        state "<b> AZ1 </b>" as az1_kv <<lz_bkgd>> {
+            state "<b>Kv-Sync:</b>\n<b>Node 1</b>" as kvnode1 <<ec2_bkgd>> {
+                kvnode1 : UserData:
+                kvnode1 : \t - Filebeat
+                kvnode1 : \t - Git2Consul (Poll : 1 minute)
+                state "docker-git2consul" as dockergit2consul
+                state "docker-consul-agent" as dockeragentkv
+            }
+        }
+
+        state "<b> AZ2 </b>" as az2 <<lz_bkgd>> {
+            state "<b>Consul Cluster:</b>\n<b>Node 2</b>" as node2 <<ec2_bkgd>> {
+                node2 : UserData:
+                node2 : \t - Telegraf
+                node2 : \t - Filebeat
+                state "docker-consul-agent" as dockeragent2
+            }
+        }
+        state "<b> AZ3 </b>" as az3 <<lz_bkgd>> {
+            state "<b>Consul Cluster:</b>\n<b>Node 3</b>" as node3 <<ec2_bkgd>> {
+                node3 : UserData:
+                node3 : \t - Telegraf
+                node3 : \t - Filebeat
+                state "docker-consul-agent" as dockeragent3
+            }
+        }
+       
+    }
+    ' ------ END : REGION ------
+
+
+    ' ------ BEGIN : GITHUB ------
+    state "<b> GitHub </b>  \n(Environment Manifest)" as github_envmanifest <<github_bkgd>> {
+
+        state "platform.af.environment-manifest" as envmanifest
+    }
+    ' ------ END : GITHUB ------
+
+
+    ' ------ BEGIN : JENKINS ------
+    state "<b> Jenkins </b> \n (jenkins-ssplatform2.ss.eislz.com)" as jenkins_ssplatform2_registrar <<jenkins_bkgd>> {
+
+        state "<b>Registrar</b> \n (EnvironmentManifest \n Sync Service)" as registrar <<ec2_bkgd>> {
+
+            state "docker-consul-agent" as dockeragent_registrar
+
+            state "<b> registrar </b>" as registrar_repo {
+                registrar_repo : - Docker Image
+                registrar_repo : - Python Consul Scripts
+
+            }
+        }
+    }
+    ' ------ END : JENKINS ------
+
+
+    state "<b>ELK - Logstash</b>" as elk <<elk_bkgd>>
+
+    state "<b>Prometheus</b>" as prom <<prom_bkgd>>
+
+    ' ------ BEGIN : NOTES ------
+    note left of elk
+
+        <b>Logstash & Prometheus :</b>
+        For each EC2 both
+        Telegraf & Filebeat clients
+        are configured to connect
+        to the Logstash
+        & Prometheus service
+        setup in the LZ
+    end note
+
+    note bottom of dockergit2consul
+
+        <b>Git2Consul :</b>
+        Runs in a docker container,
+        downloads EnvironmentManifest
+        repo and compares to Consul.
+        Differences are then written
+        back to Consul by the  
+        docker-consul-agent.
+        Polling frequency : 1 minute
+    end note
+
+    note bottom of registrar_repo
+
+        <b>Registrar :</b>
+        Services in EnvironmentManifest
+        ServiceEndpoints.json are
+        registered or updated in 
+        the Consul Catalog via Registrar
+        when an EnvironmentManifest PR
+        merges to Master.
+    end note
+    ' ------ END : NOTES ------
+
+    ' --- Resources : Region
+    prom -up-> node1
+    elk -up-> node1
+
+    node1 -right-> node2
+    node2 -left-> node1
+    node2 -right-> node3
+    node3 -left-> node2
+
+    route53 --> regionLB
+    regionLB -down-> node1
+    regionLB -down-> node2
+    regionLB -down-> node3
+
+    dockergit2consul -up-> dockeragentkv
+    dockeragentkv -down-> dockergit2consul
+
+    ' --- Resources : REGISTRAR
+    registrar -up-> node1
+    github_envmanifest -left-> registrar_repo
+
+    ' --- Resources : KV-SYNC
+    dockergit2consul --> github_envmanifest
+    dockeragentkv -left-> regionLB
+
+    dockeragent_registrar --> registrar_repo
+    registrar_repo --> dockeragent_registrar
+
+}
+
+@enduml
