@@ -1,0 +1,75 @@
+@startuml
+
+skinparam maxMessageSize 50
+
+<style>
+usecase {
+    HorizontalAlignment left
+    MaximumWidth 20
+
+}
+</style>
+
+title Victim and Type II Rescuer (Persecutor)
+
+legend
+The players:
+* Victim
+* Type II Rescuer (Victimizer/Persecutor)
+end legend
+
+
+
+actor :Victim: as vic
+
+actor :  Type II\n Rescuer: as rescue2 #palegreen;line:green;line.bold;text:green
+actor/ :  Victimizer\n(Persecutor): as vicper #DarkRed;line:red;line.bold;text:red
+
+usecase vicdetails as "
+VICTIM:
+* Terrified of abandonment
+* More desperate & needy
+
+
+"
+usecase res2details as "
+TYPE II RESCUER:
+* Terrified of abandonment
+* Terrified to fall into abyss of abandonment
+* Terror is walled off
+* Only form of 'love' or 'connection' tolerated:
+** to be the one WHO punishes + abandons
+** NOT the one WHO IS punished, neglected and finally abandonded
+
+ <pstyle='text-align:left;'>Learn for free</pstyle=>
+
+"
+
+
+usecase dosingtrans as "Dissociative Dosing Transaction
+'Succesful' dosing tranaction ==
+
+"
+
+usecase dissociated as "Dissociation or Dissociated
+
+Hypoxic ==
+Hypercarbic ==
+Hypoglycemic ==
+ Dosing Transaction
+'Succesful' dosing tranaction ==
+
+"
+
+
+ vic <-> rescue2
+ rescue2 -down-> vicper
+ vicper -up-> vic
+
+ vicdetails -right-> vic
+ res2details -left-> rescue2
+
+ dosingtrans -down-> dissociated
+
+
+@enduml
