@@ -1,0 +1,127 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+
+'Standard Libary icon skinparam settings
+' skinparam agentBackgroundColor white
+' skinparam nodeBackgroundColor white
+
+' skinparam cardBorderColor none
+' skinparam cardBackgroundColor none
+' skinparam cardShadowing true
+
+' skinparam UsecaseFontName cabr
+
+
+' skinparam roundcorner 30
+' skinparam StorageBorderColor white
+
+' skinparam actorStyle awesome
+' ' skinparam actorStyle hollow
+' skinparam Shadowing false
+
+' hide stereotype
+
+title The Game of Dissociation
+
+
+
+'NOTES
+
+'  note  "This note is connected\nto several objects." as N2
+' note on link
+' this is a state-transition note
+' end note
+
+'WORKFLOW
+
+' vic -up-> rescue1 #DarkGreen;line.dotted : My confederate
+
+'ACTORS IN THE GAME
+rectangle "Type I Rescuer \n'Ineffective Rescuing Friend'" as type1res {
+
+    actor "Type I Rescuer" as rescue1 #palegreen;line:green;line.bold;text:green
+    actor/ "   Victim\n(Rescuer)" as vic2
+
+    usecase "Essential a 'victim' waiting to happen" as rescue1uc #IndianRed;line:White;line.dashed
+
+    note left of rescue1 #LightGray
+    <b>Type I Rescuer </b>
+    The earnest, "helpful",
+    ineffective rescuing
+    friend or pal. A "Confederate"
+    or "Accomplice"
+
+    <b>In Reality</b>
+    A Victim
+
+    <b>"Rescue"=="To Disassociate"</b>
+    end note
+
+    note left of vic2
+    <b>GIVES VICTIM:</b>
+    Ineffective enabling "help"
+    to maintain dissociation
+    aka 'Dissociative
+    Dosing Transactions'
+    end note
+
+    rescue1 .[#IndianRed,plain,thickness=8].> rescue1uc : Really\n a <b>Victim </b>in\n <b>'Rescuer' clothing</b>
+    rescue1uc .[#IndianRed,plain,thickness=8].> vic2
+}
+
+rectangle "The Victim \n 'Afraid to be angry\n THEN abandoned'" as typevic {
+
+    actor :Victim: as vic
+
+    note top of vic #LightGray
+    <b>       Victim </b>
+    Attracts Rescuers
+        (Type I + II)
+
+    end note
+
+}
+
+rectangle "Type II Rescuer \n'Victimizer(Persecutor)'" as type2res {
+
+
+    actor :Type II Rescuer: as rescue2 #palegreen;line:green;line.bold;text:green
+    actor/ :  Victimizer\n(Persecutor): as vicper #DarkRed;line:red;line.bold;text:red
+
+    usecase "Conditions can never be met then flip\n into the 'persecutor' at drop of a hat" as vicpercond #IndianRed;line:White;line.dashed;text:green
+
+    note right of rescue2 #LightGray
+    <b>Type II Rescuer </b>
+    A highly "conditional" rescuer
+    "I'll 'accept', 'love' you if and when..."
+
+    <b>In Reality</b>
+    A Victimizer (Persecutor)
+
+    <b>"Rescue"=="To Disassociate"</b>
+    end note
+
+    note right of vicper
+    <b>GIVES VICTIM:</b>
+    Insults and injuries to
+    maintain dissociation
+    aka 'Dissociative
+    Dosing Transactions'
+    end note
+
+    ' vicper ..up..|> rescue2 #DarkGreen;line.dotted : Disguised As
+    rescue2 .[#IndianRed,plain,thickness=8].> vicpercond : Really\n a <b>Persecutor</b> in\n <b>'Rescuer' clothing</b>
+    vicpercond .[#IndianRed,plain,thickness=8].> vicper : Flip into\n 'Percecutor' mode
+}
+
+
+rescue1 <-[#green,plain,thickness=8]down-> vic: <b>Driven to</b>\n<b>"Rescue"</b>
+rescue2 <-[#green,plain,thickness=8]down-> vic : <b>Driven to</b>\n<b>"Rescue"</b>
+'<b>Driven to</b>\n<b>"Rescue"</b>
+
+vic2 .[#IndianRed,plain,thickness=8]up.>> vic : <b>Victim</b>\n<b>Receives</b>
+vicper .[#IndianRed,plain,thickness=8]up.>> vic : <b>Victim</b>\n<b>Receives</b>
+
+
+@enduml
