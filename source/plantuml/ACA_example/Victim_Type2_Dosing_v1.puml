@@ -116,7 +116,7 @@ rectangle "Rescuer \n(The Siege Engine)" as resEngine {
 
         usecase "Why would you\n EVER\n ask me that!" as dialog2
         usecase "This behavior\n of yours\n is trigger me!" as dialog4
-        usecase "SIGHHHH..\n (rolling eyes)" as dialog6
+        usecase "SIGHHHH..\nYour remind me\nof your sister Andrea\n (rolling eyes)" as dialog6
 
         dialog2 -down- dialog4 #line:white
         dialog4 -down- dialog6 #line:white
@@ -145,7 +145,7 @@ rectangle "Rescuer \n(The Siege Engine)" as resEngine {
     dialog3 --> dialog4 : response
     dialog4 --> dialog5 : response
     dialog5 --> dialog6
-
+    dialog6 --> dialog5
 
 
 @enduml
