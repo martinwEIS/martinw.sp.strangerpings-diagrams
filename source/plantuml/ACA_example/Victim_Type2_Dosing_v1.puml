@@ -1,0 +1,151 @@
+@startuml
+
+' left to right direction
+skinparam maxMessageSize 50
+skinparam packageStyle rectangle
+
+<style>
+usecase {
+    HorizontalAlignment left
+    MaximumWidth 20
+}
+</style>
+
+title Victim and Type II Rescuer (Persecutor)
+
+legend bottom left
+    ' * TBD1 = <color:#ADBBD2>**BLUE**</color>
+    ' * TBD2 = <color:#FFFFFF>**WHITE**</color>
+    * Victim = <color:#LemonChiffon>**WHITE**</color>
+    * Type II Rescuer = <color:#A4CCAC>**YELLOW**</color>
+    * Victimizer/Persecutor = <color:#F7ABAB>**RED**</color>
+end legend
+
+' package dosingtrans as "
+' Dissociative Dosing Transaction
+' --
+' Succesful dosing tranaction
+' Percecutor 'insult or injury' <-exchange-> 'insult or injury' Victim
+' * Both 'Players' in the game
+' DISSOCIATE:
+' -- more absent than present (unconscious - stupedied)
+' -- more there then (regressed)
+' -- less here now (present)
+' "
+
+' package dissociated as "
+' Bodily Symptoms
+' of Dissociation or Dissociated
+' ..
+' Hypoxic ==
+' Hypercarbic ==
+' Hypoglycemic ==
+
+' "
+
+' dosingtrans -down-> dissociated
+
+' actor "Victim" as vic
+' actor "Rescuer" as rescuer
+
+' rectangle "Type II Rescuer\nPersonas" as T2Resc {
+'     actor :Rescuer\n(Type II) : as rescue2 #palegreen;line:green;line.bold;text:green
+
+'     actor/ :  Victimizer\n(Persecutor): as vicper #DarkRed;line:red;line.bold;text:red
+
+'     rescue2 -down- vicper
+
+' }
+
+' rescuer -right-> rescue2
+' rescuer -right-> vicper
+
+' vic --> rescue2
+' vic -down-> vicper
+
+' vicper -down-> dosingtrans
+package theTrigger as "
+    Trigger = Rescuer is agitated
+    Event   = Starts moving furniture
+            \taround hap-hazardly
+    "
+    ' usecase "Start" as start #palegreen;line:green;line.bold
+    ' start -down-> theTrigger #palegreen;line:green
+
+rectangle "Victim \n(The Stronghold)" as vicStgHold {
+    actor "Victim" as victim3  << Hypervigilant >>
+
+
+
+    rectangle "Dialogs" as vicDiag {
+        actor/ :  Victim: as vic2 #palegreen;line:green;line.bold;text:green
+
+        usecase "Can 'WE' move\n the furniture?" as dialog1
+        usecase "I..I....\nyou are right" as dialog3
+        usecase "I'm sorry,\n I'll isolate\n in my room" as dialog5
+
+        dialog1 -down- dialog3 #line:white
+        dialog3 -down- dialog5 #line:white
+
+    }
+
+    note left of victim3
+    Victim :
+    * Senses Agitation
+    * Fears => Chaos
+    * Chaos => Unsafe
+    * Control == Safe
+    end note
+    ' note "Victim becomes anxious.\nMust suppress disturbance\n(Control == Safety)" as vicNote1
+    ' victim3 -down-> vicNote1
+     victim3 -down-> dialog1 : The Control 'Manipulation'
+
+}
+
+rectangle "Rescuer \n(The Siege Engine)" as resEngine {
+    actor "Rescuer" as rescue3 << Agitated >>
+
+
+    usecase "Start" as start2 #palegreen;line:green;line.bold
+    start2 -left-> rescue3
+
+
+
+    rectangle "Dialogs" as resDiag {
+        actor/ :  Victimizer\n(Persecutor): as vicper #DarkRed;line:red;line.bold;text:red
+
+        usecase "Why would you\n EVER\n ask me that!" as dialog2
+        usecase "This behavior\n of yours\n is trigger me!" as dialog4
+        usecase "SIGHHHH..\n (rolling eyes)" as dialog6
+
+        dialog2 -down- dialog4 #line:white
+        dialog4 -down- dialog6 #line:white
+
+    }
+
+    note top of vicper
+    Rescuer :
+    * Victim Condition NOT
+     met & awakens:
+    * The Vicimizer
+    end note
+
+
+}
+
+
+
+    theTrigger -down-> victim3
+    rescue3 -up-> theTrigger
+    ' dialog1 --> rescue3
+    rescue3 --> dialog2 #line:white
+    dialog1 -> vicper : 'Innocent' ask
+    vicper -> dialog2
+    dialog2 --> dialog3 : annoyed response
+    dialog3 --> dialog4 : response
+    dialog4 --> dialog5 : response
+    dialog5 --> dialog6
+
+
+
+@enduml
