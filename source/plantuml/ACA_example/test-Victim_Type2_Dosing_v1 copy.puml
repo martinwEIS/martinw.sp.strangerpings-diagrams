@@ -1,15 +1,31 @@
 @startuml
 
 ' left to right direction
-skinparam maxMessageSize 50
-skinparam packageStyle rectangle
+skinparam Shadowing false
+skinparam maxMessageSize 60
+' skinparam packageStyle rectangle
 
-<style>
-usecase {
-    HorizontalAlignment left
-    MaximumWidth 20
+skinparam package {
+    BorderColor white
+    ' BackgroundColor white
 }
-</style>
+
+' <style>
+' usecase {
+'     HorizontalAlignment right
+'     MaximumWidth 20
+' }
+' package {
+'     BackGroundColor #12bdb9
+'     LineThickness 1
+'     LineColor black
+' }
+' </style>
+
+skinparam rectangle{
+    BorderColor white
+    RectangleBorderThickness -1
+}
 
 title Victim and Type II Rescuer (Persecutor)
 
@@ -64,7 +80,9 @@ end legend
 ' vic -down-> vicper
 
 ' vicper -down-> dosingtrans
-    package theTrigger as "
+
+
+    card theTrigger #white;line:black;text:blue as "
         <b>GIVEN:</b> Rescuer is visibly agitated
         <b>WHEN:</b> Resucer looks for attention
                     to escape uncomfortablility
@@ -135,10 +153,10 @@ rectangle "Victim \n(The Stronghold)" as vicStgHold {
         actor/ :  Victim: as vicDiag << Hypervigilant >> #palegreen;line:green;line.bold;text:green
 
         usecase "#1\n Can 'WE' move\n the furniture?" as dialog1
-        usecase "I..I....\nyou are right" as dialog3
-        usecase "I'm sorry,\n I'll isolate\n in my room" as dialog5
+        usecase "I..I....you are right...." as dialog3
+        usecase "I'm sorry, I'll isolate\n in my room" as dialog5
 
-        dialog1 -down-|> dialog3 #line:green : counter response #1
+        dialog1 -[#green,plain,thickness=4]down-|> dialog3 : counter response #1
         dialog3 -down-|> dialog5 #line:green : counter response #2
 
     }
@@ -162,18 +180,18 @@ rectangle "Victim \n(The Stronghold)" as vicStgHold {
     vicDiag -right-> dialog1
     ' rescue3 --> dialog2 #line:white
     ' dialog1 -> vicper : 'Innocent' ask
-    dialog2 -right-> vicper
+    dialog2 <-right- vicper
 
-    dialog1 -> dialog2 #palegreen;line:green;line.bold;text:green : manipulation delivered
-    dialog2 ----> dialog1 #DarkRed;line:DarkRed;line.dashed;text:DarkRed : insult-or-injury response
+    dialog1 -[#green,plain,thickness=8]|> dialog2 #text:green : manipulation delivered\n
+    dialog2 ---[#DarkRed,dashed,thickness=8]---|> dialog1 #text:red  : insult-or-injury response\n
     ' dialog2 --> dialog3 : annoyed response
-    dialog3 --> dialog4 #palegreen;line:green;line.bold;text:green : manipulation delivered
-    dialog4 --> dialog3 #DarkRed;line:DarkRed;line.dashed;text:DarkRed :insult-or-injury response
+    dialog3 -[#green,plain,thickness=8]-|> dialog4 #text:green : manipulation delivered\t
+    dialog4 -[#DarkRed,dashed,thickness=8]-|> dialog3 #text:Red : insult-or-injury response\t
 
 
     ' dialog4 --> dialog5 : response
-    dialog5 --> dialog6 #palegreen;line:green;line.bold;text:green  : manipulation delivered
-    dialog6 --|> dialog5 #DarkRed;line:DarkRed;line.dashed;text:DarkRed  : insult-or-injury response
+    dialog5 -[#green,plain,thickness=8]-|> dialog6 #text:Green : manipulation delivered\t
+    dialog6 -[#DarkRed,dashed,thickness=8]-|> dialog5 #text:Red  : insult-or-injury response\t
 
 
     dialog5 -down-|> doseComplete #palegreen;line:green;line.bold;text:green
