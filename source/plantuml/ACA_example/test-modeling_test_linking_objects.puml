@@ -1,137 +1,140 @@
 @startuml
 
+!include <material/account.puml>
+
 ' left to right direction
 skinparam maxMessageSize 60
-skinparam roundCorner 70
+hide stereotype
+' skinparam roundCorner 70
+' skinparam Shadowing false
 
-rectangle "first response" as respbox1 {
-
-    usecase "dialog1" as dialog1
-
+skinparam rectangle {
+    roundCorner 70
+    Shadowing false
+    borderColor black
+    BackgroundColor<<dialog>> lightgrey
+    fontcolor white
 }
 
-rectangle "first response B" as respbox1b {
-
-    usecase "dialog1b" as dialog1b
-
+skinparam card {
+    BackgroundColor black
 }
 
-rectangle "second response" as respbox2 {
-
-    usecase "dialog2" as dialog2
-
-}
-
-rectangle "second response B" as respbox2b {
-
-    usecase "dialog2b" as dialog2b
-
-}
-
-rectangle "third response" as respbox3 {
-
-    usecase "dialog3" as dialog3
-
-}
-
-rectangle "third response B" as respbox3b {
-
-    usecase "dialog3b" as dialog3b
-
-}
-
-rectangle "forth response" as respbox4 {
-
-    usecase "dialog4" as dialog4
-
-}
-
-rectangle "forth response B" as respbox4b {
-
-    usecase "dialog4b" as dialog4b
-
-}
+title IDK
 
 actor "actor A" as actorA
 actor "actor B" as actorB
+card "Dialog" as boarder {
 
-rectangle rectdiag1 as "
-This is the first test
-To see if this will work
-"
-rectangle rectdiag1B as "
-This is the first test
-To see if this will work
-"
 
-rectangle rectdiag2 as "
-This is the first test
-To see if this will work
-"
-rectangle rectdiag2B as "
-This is the first test
-To see if this will work
-"
+    rectangle " " as diagBoxA {
+        rectangle rectdiag1 <<dialog>> as "
+        <color:blue><size:15><&person></size>Victim</color>
+        ==
+        1 This is the first test
+        To see if this will work
+        "
+        rectangle rectdiag2 <<dialog>> as "
+        <color:blue><size:15><&person></size>Victim</color>
+        ==
+        2 This is the first test
+        To see if this will work
+        "
+    }
 
-actor "actor1" as actor1
-actor "actor2" as actor2
+    rectangle " " as diagBoxB {
+        rectangle rectdiag1b <<dialog>> as "
+        <color:red><size:15><&person>Victimizer</size></color>
+        ==
+        1b This is the first test
+        To see if this will work
+        "
+        rectangle rectdiag2b <<dialog>> as "
+        <color:red><size:15><&person>Victimizer</size></color>
+        ==
+        2b This is the first test
+        To see if this will work
+        what if I add more works
+        what will happen
+        "
+    }
+}
+    note top of actorA
+    Victim :
+    * Senses Agitation
+    * Fear == Chaos
+    * Chaos == Unsafe
+    * Control == Safe
+    * 'The Control' == Manipulation
+    end note
 
-actorA -down-> rectdiag1
-actorB -down-> rectdiag1B
+    note top of actorB
+    Victim :
+    * Senses Agitation
+    * Fear == Chaos
+    * Chaos == Unsafe
+    * Control == Safe
+    * 'The Control' == Manipulation
+    end note
 
-rectdiag1 -right-> rectdiag1B : manipulation delivered\t
-rectdiag1B -left-> rectdiag1 : insult-or-injury response\t
+' actorA -right-> rectdiag1
+' actorB -left-> rectdiag1B
 
-rectdiag2 -right-> rectdiag2B : manipulation delivered\t
-rectdiag2B -left-> rectdiag2 :insult-or-injury response\t
+rectdiag1 --down-> rectdiag2 #line:black
+rectdiag1b --down-> rectdiag2b #line:black
 
-rectdiag1 -down-> rectdiag2
-rectdiag1B -down-> rectdiag2B
+' Convo Flow
+rectdiag1 -down-> rectdiag1b #line:black
+rectdiag1b -down-> rectdiag2 #line:black
+rectdiag2 -down-> rectdiag2b #line:black
+
+' rectdiag1 ----right----> rectdiag1B : manipulation delivered\t
+' rectdiag1B ----left----> rectdiag1 : insult-or-injury response\t
+
+' rectdiag2 --right--> rectdiag2B : manipulation delivered\t
+' rectdiag2B --left--> rectdiag2 :insult-or-injury response\t
+
+
 
 
 ' =======================================
 
 
 
-actor1 -right-> dialog1
-dialog1b <-right- actor2
+' actor1 -right-> dialog1
+' dialog1b <-right- actor2
 
 ' Link Dialogs
 
-dialog1 -down-> dialog2
-dialog2 -down-> dialog3
-dialog3 -down-> dialog4
+' dialog1 -down-> dialog2
+' dialog2 -down-> dialog3
+' dialog3 -down-> dialog4
 
 ' dialog1 -down-> respbox2
 ' ' respbox1 -down-> dialog2
 ' respbox2 -down->respbox3
 ' respbox3 -down->respbox4
 
-dialog1b -down-> dialog2b
-dialog2b -down-> dialog3b
-dialog3b -down-> dialog4b
+' dialog1b -down-> dialog2b
+' dialog2b -down-> dialog3b
+' dialog3b -down-> dialog4b
 
 ' respbox1b -down->respbox2b
 ' respbox2b -down->respbox3b
 ' respbox3b -down->respbox4b
 
 ' Convo Flow
-dialog1 ----right----> dialog1b : This is a test for looping
-dialog1b ----left----> dialog1 : this is another test
+' dialog1 ----right----> dialog1b : This is a test for looping
+' dialog1b ----left----> dialog1 : this is another test
 
-dialog2 ----right----> dialog2b : This is a test
-dialog2b ----left----> dialog2 : this is another test
+' dialog2 ----right----> dialog2b : This is a test
+' dialog2b ----left----> dialog2 : this is another test
 
-dialog3 ---> dialog3b
-dialog3b ---> dialog3
+' dialog3 ---> dialog3b
+' dialog3b ---> dialog3
 
-dialog4 ---> dialog4b
-dialog4b ---> dialog4
-
-
-
-
-
+' dialog4 ---> dialog4b
+' dialog4b ---> dialog4
 
 
 @enduml
