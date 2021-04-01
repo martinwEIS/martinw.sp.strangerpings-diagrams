@@ -17,13 +17,21 @@ skinparam rectangle {
     fontcolor<<perc>> black
     BackgroundColor<<victim>> application
     fontcolor<<victim>> navy
+    fontStyle<<victim>> segoeui
 
 }
 
 skinparam card {
     BackgroundColor white
-    borderColor lightgrey
+    borderColor darkgrey
+    borderThickness 10
     roundCorner 70
+    fontStyle roboto
+}
+
+skinparam note {
+    BackgroundColor lightgrey
+    borderColor darkgrey
 }
 
 title Dialog Chat Style
@@ -31,31 +39,35 @@ title Dialog Chat Style
 actor "actor A" as actorA
 actor "actor B" as actorB
 
-card "Dialog **TODO : Look for new icons" as boarder {
+card "Dialog **TODO :\n Look for new icons\nfont styles" as boarder {
 
     rectangle " " as diagBoxA {
         rectangle rectdiag1 <<victim>> as "
-        <color:blue><size:18><&person></size></color>
-        __victim__
-        1 This is the first testa
+    '     <color:blue><size:25><&person></size></color>
+    '    ==
+        <color:blue><size:25><&person></size></color>
+        1b This is the first testa
         To see if this will work
-        <size:18><&arrow-circle-right></size>
+        but that will work too
+
+        ' <size:18><&arrow-circle-right></size>
         "
         rectangle rectdiag2 <<victim>> as "
         <color:blue><size:18><&person>\t<&arrow-circle-right></size></color>
         __
         2 This is the first test
-        To see if this will work
+        To see if this will work but
+         that will work too
         "
     }
 
     rectangle " " as diagBoxB {
         rectangle rectdiag1b <<perc>> as "
-        <color:black><size:18><&person></size></color>
-        __victimizer__
+        <color:black><size:25><&person></size></color>
         1b This is the first test
         To see if this will work
-        <size:18><&arrow-circle-left></size>
+
+        <size:25><&arrow-circle-left></size>
         "
         rectangle rectdiag2b <<perc>> as "
         <color:black><size:18><&person>\t<&arrow-circle-left></size></color>
@@ -67,7 +79,7 @@ card "Dialog **TODO : Look for new icons" as boarder {
         "
     }
 }
-    note top of actorA
+    note left of actorA
     Victim :
     * Senses Agitation
     * Fear == Chaos
@@ -85,14 +97,14 @@ card "Dialog **TODO : Look for new icons" as boarder {
     * 'The Control' == Manipulation
     end note
 
-actorA -right-> rectdiag1
-actorB -left-> rectdiag1b
+actorA -right-> rectdiag1 #line:black
+actorB -left-> rectdiag1b #line:black
 
 rectdiag1 --down-> rectdiag2 #line:white
 rectdiag1b --down-> rectdiag2b #line:white
 
 ' Convo Flow
-rectdiag1 -down-> rectdiag1b #line:white
+rectdiag1 -down-> rectdiag1b #line:lightgrey : The manipulation\nbegins
 rectdiag1b -down-> rectdiag2 #line:white
 rectdiag2 -down-> rectdiag2b #line:white
 
