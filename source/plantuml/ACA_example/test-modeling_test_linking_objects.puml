@@ -5,53 +5,61 @@
 ' left to right direction
 skinparam maxMessageSize 60
 hide stereotype
+hide header
 ' skinparam roundCorner 70
-' skinparam Shadowing false
+skinparam Shadowing false
 
 skinparam rectangle {
     roundCorner 70
     Shadowing false
-    borderColor black
-    BackgroundColor<<dialog>> lightgrey
-    fontcolor white
+    borderColor white
+    BackgroundColor<<perc>> lightgrey
+    fontcolor<<perc>> black
+    BackgroundColor<<victim>> application
+    fontcolor<<victim>> navy
+
 }
 
 skinparam card {
-    BackgroundColor black
+    BackgroundColor white
+    borderColor lightgrey
+    roundCorner 70
 }
 
-title IDK
+title Dialog Chat Style
 
 actor "actor A" as actorA
 actor "actor B" as actorB
-card "Dialog" as boarder {
 
+card "Dialog **TODO : Look for new icons" as boarder {
 
     rectangle " " as diagBoxA {
-        rectangle rectdiag1 <<dialog>> as "
-        <color:blue><size:15><&person></size>Victim</color>
-        ==
-        1 This is the first test
+        rectangle rectdiag1 <<victim>> as "
+        <color:blue><size:18><&person></size></color>
+        __victim__
+        1 This is the first testa
         To see if this will work
+        <size:18><&arrow-circle-right></size>
         "
-        rectangle rectdiag2 <<dialog>> as "
-        <color:blue><size:15><&person></size>Victim</color>
-        ==
+        rectangle rectdiag2 <<victim>> as "
+        <color:blue><size:18><&person>\t<&arrow-circle-right></size></color>
+        __
         2 This is the first test
         To see if this will work
         "
     }
 
     rectangle " " as diagBoxB {
-        rectangle rectdiag1b <<dialog>> as "
-        <color:red><size:15><&person>Victimizer</size></color>
-        ==
+        rectangle rectdiag1b <<perc>> as "
+        <color:black><size:18><&person></size></color>
+        __victimizer__
         1b This is the first test
         To see if this will work
+        <size:18><&arrow-circle-left></size>
         "
-        rectangle rectdiag2b <<dialog>> as "
-        <color:red><size:15><&person>Victimizer</size></color>
-        ==
+        rectangle rectdiag2b <<perc>> as "
+        <color:black><size:18><&person>\t<&arrow-circle-left></size></color>
+        __victimizer__
         2b This is the first test
         To see if this will work
         what if I add more works
@@ -77,16 +85,16 @@ card "Dialog" as boarder {
     * 'The Control' == Manipulation
     end note
 
-' actorA -right-> rectdiag1
-' actorB -left-> rectdiag1B
+actorA -right-> rectdiag1
+actorB -left-> rectdiag1b
 
-rectdiag1 --down-> rectdiag2 #line:black
-rectdiag1b --down-> rectdiag2b #line:black
+rectdiag1 --down-> rectdiag2 #line:white
+rectdiag1b --down-> rectdiag2b #line:white
 
 ' Convo Flow
-rectdiag1 -down-> rectdiag1b #line:black
-rectdiag1b -down-> rectdiag2 #line:black
-rectdiag2 -down-> rectdiag2b #line:black
+rectdiag1 -down-> rectdiag1b #line:white
+rectdiag1b -down-> rectdiag2 #line:white
+rectdiag2 -down-> rectdiag2b #line:white
 
 ' rectdiag1 ----right----> rectdiag1B : manipulation delivered\t
 ' rectdiag1B ----left----> rectdiag1 : insult-or-injury response\t
