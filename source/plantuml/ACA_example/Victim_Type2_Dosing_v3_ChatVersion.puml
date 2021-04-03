@@ -1,0 +1,190 @@
+@startuml
+' !include <material/common.puml>
+!include <material/account.puml>
+!include <material/face.puml>
+!include <material/folder_move.puml>
+!include <material/account_circle.puml>
+!include <material/emoticon_tongue.puml>
+!include <material/emoticon_sad.puml>
+!include <material/code_braces.puml>
+!include <osa/user/blue/blue.puml>
+
+
+skinparam maxMessageSize 60
+skinparam Shadowing false
+hide header
+' skinparam packageStyle rectangle
+' hide stereotype
+
+skinparam package {
+    BorderColor white
+    ' BackgroundColor white
+}
+
+skinparam rectangle {
+    roundCorner 70
+    Shadowing false
+    borderColor white
+    borderColor<<rescuer>> black
+    BackgroundColor<<perc>> lightgrey
+    fontcolor<<perc>> black
+    BackgroundColor<<victim>> application
+    fontcolor<<victim>> navy
+    fontStyle<<victim>> segoeui
+}
+
+skinparam card {
+    BackgroundColor white
+    borderColor darkgrey
+    borderThickness 10
+    borderThickness<<GWT>> 1
+    roundCorner 70
+    fontStyle roboto
+}
+
+skinparam note {
+    BackgroundColor lightgrey
+    borderColor darkgrey
+}
+
+
+title Victim and Type II Rescuer (Persecutor)
+
+legend bottom left
+    ' * TBD1 = <color:#ADBBD2>**BLUE**</color>
+    ' * TBD2 = <color:#FFFFFF>**WHITE**</color>
+    * Victim = <color:#LemonChiffon>**YELLOW**</color>
+    * Type II Rescuer = <color:#A4CCAC>**GREEN**</color>
+    * Victimizer/Persecutor = <color:#F7ABAB>**RED**</color>
+end legend
+
+    ' MA_FOLDER_MOVE(Red, 1, dir, rectangle, "A label")
+    ' MA_ACCOUNT_CIRCLE(Red, 1, dir, rectangle, "A label")
+    ' MA_ACCOUNT_CIRCLE(Red,1,MW)
+
+
+' ======= DIALOG =========
+card "Dialog **TODO :\n Look for new icons\nfont styles <$blue*.3>\n<$ma_code_braces*2>" as boarder {
+
+    '======= VICITIM =========
+    rectangle " " as diagBoxVic {
+        rectangle rectdiag1v <<victim>> as "
+        <color:blue><size:0><$ma_account_circle*.75></size></color>
+        Can 'WE' move
+        the furniture?
+
+        <size:25><&arrow-circle-right></size>
+        "
+        rectangle rectdiag2v <<victim>> as "
+        <color:blue><size:25><$ma_account_circle*.75></size></color>
+
+        I..I....you
+        are right.... <$ma_emoticon_sad*.5>
+
+        <size:25><&arrow-circle-right></size>
+        "
+
+        rectangle rectdiag3v <<victim>> as "
+        <color:blue><size:25><$ma_account_circle></size></color>
+
+        I'm sorry, I'll..
+        isolate\ in my room
+
+        <size:25><&arrow-circle-right></size>
+        "
+    }
+
+    rectangle " " as diagBoxPerc {
+
+        '======= RESCUER TYPE II =========
+        rectangle rectdiag1p <<perc>> as "
+        <color:black><size:25><$ma_account_circle*.75></size></color>
+
+        Why would you
+        EVER ask me that!
+
+        <size:25><&arrow-circle-left></size>
+        "
+        rectangle rectdiag2p <<perc>> as "
+        <color:black><size:25><$ma_account_circle></size></color>
+
+        This behavior of 'yours'
+        is triggering to me!
+
+        <size:25><&arrow-circle-left></size>
+        "
+
+        rectangle rectdiag3p <<perc>> as "
+        <color:black><size:25><$ma_account_circle></size></color>
+
+        SIGHHHH..You remind me
+        of your sister Andrea!
+        (rolling eyes..w/disapproval)
+
+        <size:25><&arrow-circle-left></size>
+        "
+    }
+}
+
+' CONVO STRUCTURE
+rectdiag1v --down-> rectdiag2v #line:white
+rectdiag2v --down-> rectdiag3v #line:white
+rectdiag1p --down-> rectdiag2p #line:white
+rectdiag2p --down-> rectdiag3p #line:white
+
+' CONVO FLOW
+rectdiag1v -down-> rectdiag1p #line:lightgrey : The manipulation\nbegins
+rectdiag1p -down-> rectdiag2v #line:white
+rectdiag2v -down-> rectdiag2p #line:white
+rectdiag2p -down-> rectdiag3v #line:white
+rectdiag3v -down-> rectdiag3p #line:white
+
+
+
+' ======= THE SETUP =========
+
+card theTrigger <<GWT>> as "
+    <b>GIVEN:</b> Rescuer is visibly agitated
+    <b>WHEN:</b> Resucer looks for attention
+                to escape uncomfortablility
+        <b>AND:</b> Starts <b>'moving furniture'</b>
+                around hap-hazardly
+    <b>THEN:</b> Victim becomes Triggered
+    "
+
+    rectangle "Rescuer\n(Type II)" <<rescuer>> as rectRescSetup {
+        actor "Rescuer" as rescuer << Agitated >>
+    }
+
+    usecase "Start" as start #palegreen;line:green;line.bold
+    usecase "Dissociative Dosing Transaction\nCOMPLETE" as doseComplete
+
+    start -> rescuer
+    rescuer -right-> theTrigger
+
+' ======= THE DIALOG SETUP =========
+    actor/ :  Victim: as vicDiag << Hypervigilant >> #palegreen;line:green;line.bold;text:green
+        note top of vicDiag
+        Victim :
+        * Senses Agitation
+        * Fear == Chaos
+        * Chaos == Unsafe
+        * Control == Safe
+        * 'The Control' == Manipulation
+        end note
+
+    actor/ :  Victimizer\n(Persecutor): as percDiag #DarkRed;line:red;line.bold;text:red
+        note top of percDiag
+        Rescuer :
+        * Victim Conditions NOT
+            met & emerges the:
+        * 'Vicimizer'
+        end note
+
+    theTrigger -right-> vicDiag
+
+    vicDiag -right-> rectdiag1v
+    percDiag -left-> rectdiag1p
+
+
+@enduml

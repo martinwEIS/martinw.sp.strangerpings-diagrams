@@ -1,7 +1,6 @@
 @startuml
 
 !include <material/account.puml>
-
 ' left to right direction
 skinparam maxMessageSize 60
 hide stereotype
@@ -18,7 +17,6 @@ skinparam rectangle {
     BackgroundColor<<victim>> application
     fontcolor<<victim>> navy
     fontStyle<<victim>> segoeui
-
 }
 
 skinparam card {
@@ -43,39 +41,43 @@ card "Dialog **TODO :\n Look for new icons\nfont styles" as boarder {
 
     rectangle " " as diagBoxA {
         rectangle rectdiag1 <<victim>> as "
-    '     <color:blue><size:25><&person></size></color>
-    '    ==
         <color:blue><size:25><&person></size></color>
+
         1b This is the first testa
         To see if this will work
         but that will work too
 
-        ' <size:18><&arrow-circle-right></size>
+        <size:25><&arrow-circle-right></size>
         "
         rectangle rectdiag2 <<victim>> as "
-        <color:blue><size:18><&person>\t<&arrow-circle-right></size></color>
-        __
+        <color:blue><size:25><&person></size></color>
+
         2 This is the first test
         To see if this will work but
          that will work too
+
+        <size:25><&arrow-circle-right></size>
         "
     }
 
     rectangle " " as diagBoxB {
         rectangle rectdiag1b <<perc>> as "
         <color:black><size:25><&person></size></color>
+
         1b This is the first test
         To see if this will work
 
         <size:25><&arrow-circle-left></size>
         "
         rectangle rectdiag2b <<perc>> as "
-        <color:black><size:18><&person>\t<&arrow-circle-left></size></color>
-        __victimizer__
+        <color:black><size:25><&person></size></color>
+
         2b This is the first test
         To see if this will work
         what if I add more works
         what will happen
+
+        <size:25><&arrow-circle-left></size>
         "
     }
 }
@@ -108,53 +110,28 @@ rectdiag1 -down-> rectdiag1b #line:lightgrey : The manipulation\nbegins
 rectdiag1b -down-> rectdiag2 #line:white
 rectdiag2 -down-> rectdiag2b #line:white
 
-' rectdiag1 ----right----> rectdiag1B : manipulation delivered\t
-' rectdiag1B ----left----> rectdiag1 : insult-or-injury response\t
-
-' rectdiag2 --right--> rectdiag2B : manipulation delivered\t
-' rectdiag2B --left--> rectdiag2 :insult-or-injury response\t
-
-
-
-
 ' =======================================
 
+card theTrigger <<GWT>> as "
+    <b>GIVEN:</b> Rescuer is visibly agitated
+    <b>WHEN:</b> Resucer looks for attention
+                to escape uncomfortablility
+        <b>AND:</b> Starts <b>'moving furniture'</b>
+                around hap-hazardly
+    <b>THEN:</b> Victim becomes Triggered
+    "
+
+    rectangle "Rescuer\n(Type II)" <<rescuer>> as rectRescSetup {
+        actor "Rescuer" as rescuer << Agitated >>
+    }
+
+    usecase "Start" as start #palegreen;line:green;line.bold
+    usecase "Dissociative Dosing Transaction\nCOMPLETE" as doseComplete
+
+    start -> rescuer
+    rescuer -right-> theTrigger
 
 
-' actor1 -right-> dialog1
-' dialog1b <-right- actor2
-
-' Link Dialogs
-
-' dialog1 -down-> dialog2
-' dialog2 -down-> dialog3
-' dialog3 -down-> dialog4
-
-' dialog1 -down-> respbox2
-' ' respbox1 -down-> dialog2
-' respbox2 -down->respbox3
-' respbox3 -down->respbox4
-
-' dialog1b -down-> dialog2b
-' dialog2b -down-> dialog3b
-' dialog3b -down-> dialog4b
-
-' respbox1b -down->respbox2b
-' respbox2b -down->respbox3b
-' respbox3b -down->respbox4b
-
-' Convo Flow
-' dialog1 ----right----> dialog1b : This is a test for looping
-' dialog1b ----left----> dialog1 : this is another test
-
-' dialog2 ----right----> dialog2b : This is a test
-' dialog2b ----left----> dialog2 : this is another test
-
-' dialog3 ---> dialog3b
-' dialog3b ---> dialog3
-
-' dialog4 ---> dialog4b
-' dialog4b ---> dialog4
 
 
 @enduml
