@@ -22,6 +22,10 @@
 
 @startuml
 
+' See Hitchhiker Guide for 'Arrows' POLYLINE & ORTHO
+' skinparam linetype polyline
+skinparam linetype ortho
+
 allow_mixing
 
 /'
