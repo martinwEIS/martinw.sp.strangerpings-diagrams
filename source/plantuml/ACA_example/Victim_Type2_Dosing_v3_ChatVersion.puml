@@ -13,8 +13,9 @@
 skinparam maxMessageSize 60
 skinparam Shadowing false
 hide header
+hide stereotype
 ' skinparam packageStyle rectangle
-' hide stereotype
+
 
 skinparam package {
     BorderColor white
@@ -157,10 +158,11 @@ card theTrigger <<GWT>> as "
     }
 
     usecase "Start" as start #palegreen;line:green;line.bold
-    usecase "Dissociative Dosing Transaction\nCOMPLETE" as doseComplete
+    usecase "Dissociative Dosing Transaction\nCOMPLETE" as doseComplete #palegreen;line:green;line.bold
 
     start -> rescuer
     rescuer -right-> theTrigger
+    doseComplete <-right- rectdiag3p
 
 ' ======= THE DIALOG SETUP =========
     actor/ :  Victim: as vicDiag << Hypervigilant >> #palegreen;line:green;line.bold;text:green

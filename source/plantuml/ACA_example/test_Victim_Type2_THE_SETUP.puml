@@ -1,0 +1,158 @@
+@startuml
+
+!include <material/common.puml>
+!include <material/account_circle.puml>
+!include <material/alpha.puml>
+
+skinparam maxMessageSize 60
+' skinparam Shadowing false
+hide header
+hide stereotype
+
+skinparam package {
+    DefaultTextAlignment<<test>> center
+}
+
+skinparam arrow {
+    color black
+    MessageAlignment center
+    horizontalAlignment right
+    fontStyle bold
+}
+
+skinparam actor {
+    BackgroundColor<<perc>> darkred
+    BorderColor<<perc>> red
+    BorderThickness<<perc>>  10
+    fontcolor<<perc>> red
+    fontStyle<<perc>> bold
+
+    BackgroundColor<<rescueT2>> palegreen
+    BorderColor<<rescueT2>> green
+    BorderThickness<<rescueT2>> 10
+    fontcolor<<rescueT2>> green
+    fontStyle<<rescueT2>> bold
+
+    BackgroundColor<<victim>> lightblue
+    BorderColor<<victim>> blue
+    BorderThickness<<victim>> 10
+    fontcolor<<victim>> blue
+    fontStyle<<victim>> bold
+}
+
+skinparam card {
+    shadowing false
+    borderColor white
+    BackgroundColor<<victim>> application
+    fontcolor<<victim>> navy
+    fontStyle<<victim>> segoeui
+    roundCorner<<victim>> 20
+
+    roundCorner<<rescueT2>> 20
+    BackgroundColor<<rescueT2>> palegreen
+
+    borderColor<<rescuer>> black
+
+    BackgroundColor<<perc>> pink
+    fontcolor<<perc>> black
+
+    borderColor<<percGroup>> black
+    borderStyle<<percGroup>> dashed
+}
+
+title Victim and Type II Rescuer (Persecutor)
+
+legend bottom left
+    * Victim = <color:#ADBBD2>**BLUE**</color>
+    * Type II Rescuer = <color:#A4CCAC>**GREEN**</color>
+    * Victimizer/Persecutor = <color:#F7ABAB>**RED**</color>
+    ' * TBD2 = <color:#FFFFFF>**WHITE**</color>
+    ' * Victim = <color:#LemonChiffon>**YELLOW**</color>
+end legend
+
+'  Try to import images
+
+
+card vicdetails<<victim>> as "
+<color:blue><$ma_account_circle*.5></color> = VICTIM
+==
+* Terrified of abandonment
+* More desperate & needy
+
+
+"
+
+card res2details<<rescueT2>> as "
+<color:green><$ma_account_circle*.5></color> = VICTIMTYPE II RESCUER:
+==
+* AKA 'Conditional' Rescuer
+** 'Conditions' that can never be met
+* Terrified of :
+** abandonment
+** to fall into abyss of abandonment
+* Dissassociation :
+** Terror is walled off
+* Only form of 'love' or 'connection' tolerated:
+** TO BE the 'one' WHO punishes + abandons
+** NOT the 'one' WHO IS punished, neglected and finally abandonded
+"
+
+
+
+card dosingtrans as "
+Dissociative Dosing Transaction
+--
+Succesful dosing tranaction
+Percecutor 'insult or injury' <-exchange-> 'insult or injury' Victim
+* Both 'Players' in the game
+DISSOCIATE:
+-- more absent than present (unconscious - stupedied)
+-- more there then (regressed)
+-- less here now (present)
+"
+
+card dissociated as "
+Bodily Symptoms
+of Dissociation or Dissociated
+..
+Hypoxic ==
+Hypercarbic ==
+Hypoglycemic ==
+
+"
+' ======= ACTORS =======
+    actor  "Victim\n" as vic <<victim>>
+
+    card "Perc group" as percGroup <<percGroup>> {
+        actor  " Type II\nRescuer" as rescueT2 <<rescueT2>>
+
+        actor/ "  Victimizer\n(Persecutor)" as vicPerc <<perc>>
+
+        card percdetails<<perc>> as "
+            <color:red><$ma_account_circle{scale=0.8}></color> = VICTIMIZER / PERSECUTOR
+            ==
+            * Emerges when :
+            ** Conditions are not meet
+            * Responds with :
+            ** insults and injury
+        "
+
+        rescueT2 -right-> percdetails : When Conditions\nare not met...
+        percdetails -down-> vicPerc
+
+    }
+
+vic -right-> vicdetails
+'  vic <-> rescueT2
+'  rescueT2 -down-> vicPerc
+'  vicPerc -up-> vic
+
+
+'  vicdetails -right-> vic
+'  res2details -left-> rescueT2
+'  percdetails -left-> vicPerc
+
+ dosingtrans -down-> dissociated
+
+
+@enduml

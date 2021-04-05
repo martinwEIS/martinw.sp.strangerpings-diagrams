@@ -1,0 +1,85 @@
+/' URLS:
+  https://www.augmentedmind.de/2021/01/03/plantuml-tutorial-diagrams-as-code/
+
+  http://plantuml.com/guide
+
+  https://forum.plantuml.net/search?q=cannot+find+height
+
+  COLOR LOOKUP:
+  https://www.colorhexa.com/
+
+
+  ICON Websites
+  https://materialdesignicons.com/  ***letters and numbers
+  https://fontawesome.com/start
+  https://github.com/Templarian/MaterialDesign/tree/master/svg
+
+
+  TODO:
+  1. Try to get svg to work? maybe?
+  2. Download numbers and letters (.png)
+'/
+
+@startuml
+
+allow_mixing
+
+/'
+
+Only need images black, size 48 outline. Color and scale can be changed.
+
+sprite mySpriteA \png\
+sprite mySpriteB \png\
+sprite mySpriteC \png\
+sprite mySpriteD \png\
+sprite mySpriteE \png\
+sprite mySpriteF \png\
+sprite mySprite1 \png\
+sprite mySprite2 \png\
+sprite mySprite3 \png\
+sprite mySprite4 \png\
+sprite mySprite5 \png\
+sprite mySprite6 \png\
+
+'/
+sprite mySpriteTestA \ACA_example\png\alpha-a-circle-outline.png
+sprite mySpriteTestB \ACA_example\png\alpha-b-circle-outline.png
+
+' ===Couldnt get svg files to render (get missing height error)
+' sprite mySprite \png\alpha-z.svg
+
+
+'  <img:file> : the file must be accessible by the filesystem
+'  : the URL must be available from the Internet
+
+
+
+rectangle "<$mySpriteTestB>" as rectB
+
+card test {
+
+    ' "<$mySprite2>"
+
+}
+
+
+card vicdetails<<victim>> as "
+
+<img:http://plantuml.com/logo3.png{scale=0.5}>
+--
+
+Test variable with image
+<color:blue><$mySpriteTestB{scale=1}></color> 'Blue'
+<color:Aliceblue><$mySpriteTestB{scale=1}></color> 'Aliceblue'
+<color:#8b0000><$mySpriteTestB{scale=.5}></color> 'DarkRed Hex'
+<color:darkred><$mySpriteTestA{scale=.25}></color> 'DarkRed plantuml'
+<color:darkred><$mySpriteTestA{scale=1}></color> 'DarkRed plantuml'
+
+"
+' using img: can adjust scale but NOT color need to have png pre-colored
+test -right-> vicdetails : <color:green><img:\ACA_example\png\alpha-a-circle-outline.png{scale=.75}></color>
+
+rectB -up-> test : <color:darkred><$mySpriteTestA{scale=1}></color>
+
+
+@enduml
