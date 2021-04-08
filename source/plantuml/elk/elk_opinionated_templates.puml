@@ -1,0 +1,90 @@
+@startuml
+
+' skinparam linetype polyline
+skinparam linetype ortho
+
+    rectangle "environmentManifest" as envmanrepo {
+        rectangle envmanifest [
+            <b>environment</b>
+                ads
+                <color:blue><b>ehost-devqa</b></color>
+                |_ <b>BaseEnvironment</b>
+                    |_ <color:blue><b>ServiceEndpoints.json</b>  <b>(Global Level)</b></color>
+                        |_ redis
+                            - <b>address = logstash.ehost-devqa.eislz.com
+                            - <b>name =  redis
+                            - <b>port = 5044
+                |_ <b>KVP</b>
+                    |_ <color:blue><b>ExternalAgents</b>  <b>(Global Level)</b></color>
+                        |_ Filebeat
+                            |_ centos7ami
+                            |_ <b>windows2016ami</b>
+                                |_ <color:SteelBlue><b>InputJsonKeysUnderRoot = true</b></color>
+                                |_ <color:SteelBlue><b>InputJsonMessageKey = log</b></color>
+                                |_ <color:SteelBlue><b>InputPaths = c:\Logs\Service\Logstash\transaction.log</b></color>
+                                |_ <color:SteelBlue><b>InputTags = filebeat</b></color>
+                                |_ <color:SteelBlue><b>InputType = log</b></color>
+                                |_ <color:SteelBlue><b>LoggingLevel = info</b></color>
+                                |_ <color:SteelBlue><b>OutputLogstashKey = logstash</b></color>
+                                |_ <b><color:red>IndexTemplate<b> = Default</color>
+                                |_ <b><color:red>VPC</b> = <color:red>ehost-devqa</color>
+                    |_ <color:blue><b>Services</b>  <b>(User Customized Level)</b></color>
+                        |_ <b>af-admin-gateway-service</b>
+                        |_ Agent
+                            |_AppDynamics
+                            |_ <b>Filebeat</b>
+                                |_ <b>InputPaths
+                                    - <b>Value = C:\log4net\AdminGatewayService.log
+                                |_ <b><color:red>IndexTemplate</color>
+                                    - <b>Value = <color:red>User-to-Define</color>
+                            |_ Telegraf
+                ehost-integration
+                ehost-live-pi
+                ehost-sigma
+        ]
+    }
+
+    rectangle "EC2" as ec2 {
+        rectangle "filebeat client" as filebeatcli {
+            rectangle filebeatyml [
+                filebeat.prospectors:
+                - input_type: <b>log</b>
+                paths:
+                    - C:\log4net\HostNotifyProxy\HostNotifyProxy.log
+                    - <b>C:\log4net\AdminGatewayService.log</b>
+                json.message_key: <b>log</b>
+                json.keys_under_root: <b>true</b>
+                tags: <b>[filebeat]</b>
+                - input_type: log
+                paths:
+                    - C:/ProgramData/consul/logs/consul-output.log
+                fields:
+                    category: consul_log
+                    appname: consul
+                    hosttype: webserver
+                    program: consul.exe
+                    retention: '30'
+                exclude_lines: ["^DEBUG"]
+                output.redis:
+                hosts: <b>["logstash.ehost-devqa.eislz.com:5400"]</b>
+                key: <b>logstash</b>
+                logging.level: <b>info
+
+            ]
+        }
+
+        rectangle "Logfiles" as logfile
+        ' add line sample from logfile w/new fields
+        rectangle "ConsulAgent" as consulagent
+    }
+
+
+
+
+    consulagent <-down-> envmanrepo
+    consulagent --> filebeatyml
+    filebeatyml -down-|> logfile
+    logfile -up-|> filebeatyml
+    filebeatyml -up-> logstash  : PORT 5044
+    logstash -up-> elasticsearch
+@enduml
