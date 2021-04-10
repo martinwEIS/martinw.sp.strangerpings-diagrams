@@ -1,42 +1,81 @@
 @startuml
 
-' skinparam linetype polyline
+left to right direction
+
+'DIAGRAM COLOR CODES
+' New Component
+!define GreenFillEis #A4CCAC
+!define GreenStrokeEis #268742
+
+' Modified Component
+!define BlueFillEis #ADBBD2
+!define BlueStrokeEis #002F56
+
+' Unmodified Component
+!define WhiteFillEis #FFFFFF
+!define WhiteStrokeEis #666666
+
+' Deprecated Component
+!define RedFill #F7ABAB
+!define RedStrokeEis #E83030
+
+skinparam ranksep 50
 skinparam linetype ortho
 
-    rectangle "environmentManifest" as envmanrepo {
+skinparam rectangle {
+    BackgroundColor white
+    BackgroundColor<<modified>> BlueFillEis
+}
+
+
+title Filebeat Consul Template Components  \n<color:#F7ABAB>**(New Proposed Design)**</color>
+
+header: EPA.Stranger-Pings (2021-03-24)
+
+footer: https://github.com/EBSCOIS/platform.infrastructure.elk/tree/master/docs
+
+legend top right
+    * New Component           = <color:#A4CCAC>**GREEN**</color>
+    * Modified Component     = <color:#ADBBD2>**BLUE**</color>
+    * Unmodified Component = <color:#FFFFFF>**WHITE**</color>
+    * Deprecated Component = <color:#F7ABAB>**RED**</color>
+end legend
+
+caption Version 1.0
+
+    rectangle "environmentManifest" as envmanrepo <<modified>> {
         rectangle envmanifest [
             <b>environment</b>
                 ads
                 <color:blue><b>ehost-devqa</b></color>
                 |_ <b>BaseEnvironment</b>
-                    |_ <color:blue><b>ServiceEndpoints.json</b>  <b>(Global Level)</b></color>
-                        |_ redis
-                            - <b>address = logstash.ehost-devqa.eislz.com
-                            - <b>name =  redis
-                            - <b>port = 5044
+                    |_ <color:blue><b>ServiceEndpoints.json (Global Level)</b></color>
+                        |_ <back:yellow><b>redis</b></back>
+                            - <back:yellow><b>address = logstash.ehost-devqa.eislz.com</b></back>
+                            - <back:yellow><b>name =  redis </b></back>
+                            - <back:yellow><b>port = 5044 </b></back>
                 |_ <b>KVP</b>
-                    |_ <color:blue><b>ExternalAgents</b>  <b>(Global Level)</b></color>
+                    |_ <color:blue><b>ExternalAgents (Global Level)</b></color>
                         |_ Filebeat
                             |_ centos7ami
                             |_ <b>windows2016ami</b>
-                                |_ <color:SteelBlue><b>InputJsonKeysUnderRoot = true</b></color>
-                                |_ <color:SteelBlue><b>InputJsonMessageKey = log</b></color>
-                                |_ <color:SteelBlue><b>InputPaths = c:\Logs\Service\Logstash\transaction.log</b></color>
-                                |_ <color:SteelBlue><b>InputTags = filebeat</b></color>
-                                |_ <color:SteelBlue><b>InputType = log</b></color>
-                                |_ <color:SteelBlue><b>LoggingLevel = info</b></color>
-                                |_ <color:SteelBlue><b>OutputLogstashKey = logstash</b></color>
-                                |_ <b><color:red>IndexTemplate<b> = Default</color>
-                                |_ <b><color:red>VPC</b> = <color:red>ehost-devqa</color>
-                    |_ <color:blue><b>Services</b>  <b>(User Customized Level)</b></color>
+                                |_ <back:yellow><b>InputJsonKeysUnderRoot = true</b></back>
+                                |_ <back:yellow><b>InputJsonMessageKey = log</b></back>
+                                |_ <back:yellow><b>InputPaths = c:\Logs\Service\Logstash\/transactions.log</b></back>
+                                |_ <back:yellow><b>InputTags = filebeat</b></back>
+                                |_ <back:yellow><b>InputType = log</b></back>
+                                |_ <back:yellow><b>LoggingLevel = info</b></back>
+                                |_ <back:yellow><b>OutputLogstashKey = logstash</b></back>
+                                |_ <color:GreenStrokeEis><b>IndexTemplate<b> = log*</b></color>
+                                |_ <color:GreenStrokeEis><b>VPC = ehost-devqa</b></color>
+                    |_ <color:blue><b>Services (User Customized Level)</b></color>
                         |_ <b>af-admin-gateway-service</b>
                         |_ Agent
                             |_AppDynamics
                             |_ <b>Filebeat</b>
-                                |_ <b>InputPaths
-                                    - <b>Value = C:\log4net\AdminGatewayService.log
-                                |_ <b><color:red>IndexTemplate</color>
-                                    - <b>Value = <color:red>User-to-Define</color>
+                                |_ <back:yellow><b><color:blue><b>InputPaths = C:\log4net\AdminGatewayService.log</color>
+                                |_ <color:GreenStrokeEis><b>IndexTemplate = dotnet*</b></color>
+                                |_ <color:GreenStrokeEis><b>InputTags = filebeat, ehost-devqa</b></color>
                             |_ Telegraf
                 ehost-integration
                 ehost-live-pi
@@ -44,17 +83,19 @@ skinparam linetype ortho
         ]
     }
 
-    rectangle "EC2" as ec2 {
-        rectangle "filebeat client" as filebeatcli {
+    rectangle "EC2\nehost-devqa" as ec2 {
+        rectangle "filebeat client" <<modified>> as filebeatcli {
             rectangle filebeatyml [
                 filebeat.prospectors:
-                - input_type: <b>log</b>
+                - input_type: <back:yellow><b>log</b></back>
                 paths:
                     - C:\log4net\HostNotifyProxy\HostNotifyProxy.log
-                    - <b>C:\log4net\AdminGatewayService.log</b>
-                json.message_key: <b>log</b>
-                json.keys_under_root: <b>true</b>
-                tags: <b>[filebeat]</b>
+                    - <back:yellow><b>C:\log4net\AdminGatewayService.log</b></back>
+                <color:GreenStrokeEis><b>index_template: dotnet*</b></color>
+                json.message_key: <back:yellow><b>log</b></back>
+                json.keys_under_root: <back:yellow><b>true</b></back>
+                tags: <color:GreenStrokeEis><b>[filebeat, ehost-devqa]</b></color>
+                <color:GreenStrokeEis><b>vpc: ehost-devqa</b></color>
                 - input_type: log
                 paths:
                     - C:/ProgramData/consul/logs/consul-output.log
@@ -66,9 +107,9 @@ skinparam linetype ortho
                     retention: '30'
                 exclude_lines: ["^DEBUG"]
                 output.redis:
-                hosts: <b>["logstash.ehost-devqa.eislz.com:5400"]</b>
-                key: <b>logstash</b>
-                logging.level: <b>info
+                hosts: <back:yellow><b>["logstash.ehost-devqa.eislz.com:5400"]</b></back>
+                key: <back:yellow><b>logstash</b></back>
+                logging.level: <back:yellow><b>info</b></back>
 
             ]
         }
@@ -76,15 +117,22 @@ skinparam linetype ortho
         rectangle "Logfiles" as logfile
         ' add line sample from logfile w/new fields
         rectangle "ConsulAgent" as consulagent
+        rectangle "ConsulTemplate\n\n  <b>filebeat.ctmpl</b>" as consultemplateEC2 <<modified>>
     }
 
+    rectangle "platform.af.windows2016AIT" as win2016ait <<modified>> {
+        rectangle "ConsulTemplate\n\n  <b>filebeat.ctmpl</b>" as consultemplateAIT
+    }
 
+    rectangle "Logstash" as logstash
+    rectangle "elasticsearch" as elasticsearch
 
-
-    consulagent <-down-> envmanrepo
-    consulagent --> filebeatyml
+    consultemplateAIT  --|> consultemplateEC2
+    consulagent <|--|> envmanifest
+    consulagent --> consultemplateEC2
+    consultemplateEC2 --> filebeatyml
     filebeatyml -down-|> logfile
     logfile -up-|> filebeatyml
-    filebeatyml -up-> logstash  : PORT 5044
-    logstash -up-> elasticsearch
+    filebeatyml -right-|> logstash : PORT 5044
+    logstash --> elasticsearch
 @enduml
