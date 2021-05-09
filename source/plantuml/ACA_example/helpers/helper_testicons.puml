@@ -1,7 +1,0 @@
-@startuml
-actor a
-usecase c #palegreen;line:green;line.dashed;text:green
-newpage
-actor b #pink;line:red;line.bold;text:red
-usecase d #aliceblue;line:blue;line.dotted;text:blue
-@enduml

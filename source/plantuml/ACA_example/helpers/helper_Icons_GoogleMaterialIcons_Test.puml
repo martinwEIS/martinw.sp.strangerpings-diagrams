@@ -1,23 +1,28 @@
 /' URLS:
-  https://www.augmentedmind.de/2021/01/03/plantuml-tutorial-diagrams-as-code/
+    https://www.augmentedmind.de/2021/01/03/plantuml-tutorial-diagrams-as-code/
 
-  http://plantuml.com/guide
+    http://plantuml.com/guide
 
-  https://forum.plantuml.net/search?q=cannot+find+height
+    https://forum.plantuml.net/search?q=cannot+find+height
 
   COLOR LOOKUP:
-  https://www.colorhexa.com/
+    https://www.colorhexa.com/
 
+  ** USE THIS SITE **
+  ICON Websites Download PNG Images
+    https://materialdesignicons.com/  ***letters and numbers
+      1. Click on icon
+      2. Click on "Icon" button (lower righthand)
+      3. Select == '.PNG 48 white"
+      4. Download image to directory inside PlantUML source
 
-  ICON Websites
-  https://materialdesignicons.com/  ***letters and numbers
-  https://fontawesome.com/start
-  https://github.com/Templarian/MaterialDesign/tree/master/svg
-
+  ** NEED TO RESEARCH THESE SITES **
+    ICONS - OTHER
+    https://fontawesome.com/start
+    https://github.com/Templarian/MaterialDesign/tree/master/svg
 
   TODO:
-  1. Try to get svg to work? maybe?
-  2. Download numbers and letters (.png)
+    1. Try to get svg to work? maybe?
 '/
 
 @startuml
@@ -30,39 +35,31 @@ allow_mixing
 
 /'
 
-Only need images black, size 48 outline. Color and scale can be changed.
-
-sprite mySpriteA \png\
-sprite mySpriteB \png\
-sprite mySpriteC \png\
-sprite mySpriteD \png\
-sprite mySpriteE \png\
-sprite mySpriteF \png\
-sprite mySprite1 \png\
-sprite mySprite2 \png\
-sprite mySprite3 \png\
-sprite mySprite4 \png\
-sprite mySprite5 \png\
-sprite mySprite6 \png\
-
+Only need images whtite, size 48 outline. Color and scale can be changed in plantUML using creole.
 '/
-sprite mySpriteTestA \ACA_example\png\alpha-a-circle-outline.png
-sprite mySpriteTestB \ACA_example\png\alpha-b-circle-outline.png
+sprite mySpriteAlphaA \ACA_example\png\alpha-a-circle-outline-wht-48.png
+sprite mySpriteAlphaB \ACA_example\png\alpha-b-circle-outline-wht-48.png
+sprite mySpriteAlphaC \ACA_example\png\alpha-c-circle-outline-wht-48.png
+sprite mySpriteAlphaD \ACA_example\png\alpha-d-circle-outline-wht-48.png
+sprite mySpriteAlphaE \ACA_example\png\alpha-e-circle-outline-wht-48.png
+sprite mySpriteAlphaF \ACA_example\png\alpha-f-circle-outline-wht-48.png
 
-' ===Couldnt get svg files to render (get missing height error)
-' sprite mySprite \png\alpha-z.svg
+sprite mySpriteNum1 \ACA_example\png\numeric-1-circle-outline-wht-48.png
+sprite mySpriteNum2 \ACA_example\png\numeric-2-circle-outline-wht-48.png
+sprite mySpriteNum3 \ACA_example\png\numeric-3-circle-outline-wht-48.png
+sprite mySpriteNum4 \ACA_example\png\numeric-4-circle-outline-wht-48.png
+sprite mySpriteNum5 \ACA_example\png\numeric-5-circle-outline-wht-48.png
+sprite mySpriteNum6 \ACA_example\png\numeric-6-circle-outline-wht-48.png
 
 
-'  <img:file> : the file must be accessible by the filesystem
-'  : the URL must be available from the Internet
+' <img:file> : the file must be accessible by the filesystem
+' < > : the URL must be available from the Internet
 
 
 
 rectangle "<$mySpriteTestB>" as rectB
 
-card test {
-
-    ' "<$mySprite2>"
+card "<$mySpriteTestC>\n <$mySpriteTestC>" as test {
 
 }
 
@@ -79,11 +76,17 @@ Test variable with image
 <color:darkred><$mySpriteTestA{scale=.25}></color> 'DarkRed plantuml'
 <color:darkred><$mySpriteTestA{scale=1}></color> 'DarkRed plantuml'
 
+<color:#8b0000><$mySpriteTestCscale=.5}></color> <color:blue><$mySpriteTestC{scale=.5}></color>
+<$mySpriteTestD>
+<$mySpriteTestD>
+
+
+
 "
 ' using img: can adjust scale but NOT color need to have png pre-colored
-test -right-> vicdetails : <color:green><img:\ACA_example\png\alpha-a-circle-outline.png{scale=.75}></color>
+test -right-> vicdetails
 
-rectB -up-> test : <color:darkred><$mySpriteTestA{scale=1}></color>
+rectB -up-> test : <color:darkred><$mySpriteTestA{scale=1}></color> \n<$mySpriteTestD> \n<$mySpriteTestC>
 
 
 @enduml

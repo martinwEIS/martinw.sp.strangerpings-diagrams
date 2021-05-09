@@ -1,0 +1,163 @@
+@startmindmap
+
+' <&name> = creole open iconic icons : https://useiconic.com/open/
+
+'--------STYLING---------
+<style>
+mindmapDiagram {
+  .green {
+    BackgroundColor lightgreen
+  }
+  .asChild {
+    BackgroundColor Yellow
+  }
+  .asAdult {
+    BackgroundColor lightblue
+  }
+}
+</style>
+
+'--------MINDMAP---------
+
+* <&star>Trait6
+
+'-------The Laundry List-------
+**: <&circle-x>
+===\t\t\tThe Laundry List
+"<u:red>We have an overdeveloped sense of responsibility</u>"
+
+# It is <back:Yellow><u>easier</u></back> (//"necessary"//) for us to be
+concerned with others rather than ourselves
+
+# This enables us not to look too closely
+at our own faults, etc.;
+
+***:===As Children
+====Magical Powers
+* natural belief we are omnipotent
+* child cries and caregiver appears
+** Belief :  crying == produces caregiver (magically)
+* Magical powers are overused to give normalcy in chaotic family
+** family acts crazily
+*** magical powers (crying) could control them
+*** became responsible to control them even though
+         it was not our responsibility and was beyond our control.
+*** Try to treat the symptom(the action/behavior)
+          not problem(alcoholism)
+* **Rescuer Role** (emerges)
+** Defaulting into Victim or Victimzer
+|= Internal Dosing |= Effect    |
+| Adrenaline      | Excitement |
+| Cortisol        | Worry      |
+|                 | Internal Speeedball|
+;<<asChild>>
+
+****:==As Adults
+see pg. 52 paragraph#2
+;<<asAdult>>
+
+
+***:===As Children
+====Necessary ==> Hypervigilance
+* __Hypervigilance__ made it __necessary__ for us as
+ children to focus on others so that we could __survive__;<<asChild>>
+
+***:===As Children
+==== Definition:  "Hypervigilance"
+* Can be a <w>symptom</w> of PTSD
+* Unusually sensitive to:
+| the environment | the people around them |
+
+* The subconscious is constantly anticipating danger.
+* As a result, their senses are on high alert
+  ready to spot and respond to danger such as:
+| a physical danger | repeat of a traumatic event|
+| feel as though there is always\n a threat around the corner | something wrong in a relationship |;<<asChild>>
+
+****_ **Symptoms**
+***** "Physical"
+******:
+| dilated pupils      | breathing very quickly |
+| seeming restless ** | sweating **            |
+| rapid heart beat ** |                        |;
+***** "Behavioral"
+******:
+| keep checking their surroundings                            | find it hard to focus on conversations          |
+| trouble getting to sleep or staying asleep                  | find crowded or noisy environments overwhelming |
+| look closely at people to see if they are\n holding weapons | be easily startled and jump or scream at things\n they hear or see suddenly |
+| overanalyze situations and believe them to\n be worse than they are| be overly sensitive to people’s tone\n or expressions, taking them personally |
+| overreact to things happening around them in\n a way that may seem hostile | overestimate the chances of a bad thing\n happening to them physically or in their relationships |;
+***** "Complications\n (Long-term)"
+******:
+| difficulty in relationships     | physical and mental exhaustion |
+| problems in the workplace       | obsessive behavior patterns    |
+| avoidance of social situations  |                                |;
+
+****_ **Causes**
+***** "Anxiety"
+***** "PTSD"
+***** "Triggers"
+******:
+| feeling claustrophobic **       | criticism or embarrassment **        |
+| crowded environments  **        | competing demands or expectations ** |
+| uncertain situations **         | chaotic behavior by others **        |
+| reminders of past trauma        | feeling as if they have been  abandoned ** |
+| arguments and shouting **       | feeling or anticipating pain **      |
+| being emotionally distressed ** |                                      |;
+
+
+***:===As Children
+* As children we were completely busy
+looking outward to survive
+;<<asChild>>
+
+'-------The Other Laundry List-------
+
+**: <&circle-x>
+===\tThe Other Laundry List
+"<u:red>We are irresponsible and self-centered..</u>"
+
+* Our inflated sense of self-worth and
+self-importance prevents us from seeing
+our <u>deficiencies</u> and <u>shortcomings</u>.
+;
+*** <s>Raspmbc</s> => OSMC
+*** <s>Raspyfi</s> => Volumio
+
+left side
+
+'-------The Flip Side of The Laundry List-------
+**: <&circle-check>
+===The Flip Side of The Laundry List
+
+"We do not use <u>enabling</u> as a way to avoid
+ looking at <u>our</u> own <u>shortcomings</u>"
+;
+
+'-------The Flip Side of The Other Laundry List-------
+**: <&circle-check>
+===The Flip Side of The Other Laundry List
+
+"Through our <u>in-depth inventory</u> we discover
+ our <u>true identity</u> as <u>capable<u>, <u>worthwhile</u> people."
+
+* By asking to have our shortcomings removed
+* we are <u>freed</u> from the <u>burden</u> of:
+** <u>inferiority</u> and
+** <u>grandiosity</u>
+;
+
+'==========TITLE============
+caption figure 1
+title ACA - Trait 6
+
+header
+My ACA - Trait 6
+endheader
+
+center footer My ACA - Trait 6
+
+legend left
+  Short legend
+endlegend
+@endmindmap
