@@ -9,10 +9,13 @@ mindmapDiagram {
     BackgroundColor lightgreen
   }
   .asChild {
-    BackgroundColor Yellow
+    BackgroundColor lightgreen
   }
   .asAdult {
     BackgroundColor lightblue
+  }
+  .question {
+    BackgroundColor Yellow
   }
 }
 </style>
@@ -26,7 +29,7 @@ mindmapDiagram {
 ===\t\t\tThe Laundry List
 "<u:red>We have an overdeveloped sense of responsibility</u>"
 
-# It is <back:Yellow><u>easier</u></back> (//"necessary"//) for us to be
+# It is <back:WhiteSmoke><u>easier</u></back> (//"necessary"//) for us to be
 concerned with others rather than ourselves
 
 # This enables us not to look too closely
@@ -36,8 +39,9 @@ at our own faults, etc.;
 ====Magical Powers
 * natural belief we are omnipotent
 * child cries and caregiver appears
-** Belief :  crying == produces caregiver (magically)
-* Magical powers are overused to give normalcy in chaotic family
+|Belief :  crying == produces caregiver (magically)|
+
+* **Magical powers** are overused to give normalcy in chaotic family
 ** family acts crazily
 *** magical powers (crying) could control them
 *** became responsible to control them even though
@@ -58,20 +62,19 @@ The Tactic (rescuer role) became a "Habit" to:
 * __ALWAYS__ "assume" over-responsibility for others (insert myself)
 ** __WHY__ : because it gave us an excuse not look at ourselves
 
-<back:MistyRose>Why not look at ourselves?</back>
+**"Habit" (over) "Honesty"**
+| Looking at self => discomfort & pain(depression/sadness) =>\n Being "responsible" and "helpful" to others (aka rescuer role) =>\n Replaces "discomfort" with internal dosing of "worry" & "excitement" =>\n "Responsible" and "Helful" to others distracts from =>\n "Healing" my True Self |
+;<<asAdult>>
+
+*****: ???
+**Why not look at ourselves?**
 * discomfort of "honestly" looking at our pain and losses
 * unexpressed feeling and memories from tramatic childhood has
    festered to the point its to BIG for "ME" to control
 * when examined, almost always looking destructively and in
    a self-critical manner.
 * dont know how to look at ourselves in a constructive way
-
-
-**"Habit" (over) "Honesty"**
-
-| Looking at self => discomfort & pain(depression/sadness) =>\n Being "responsible" and "helpful" to others (aka rescuer role) =>\n Replaces "discomfort" with internal dosing of "worry" & "excitement" =>\n "Responsible" and "Helful" to others distracts from =>\n "Healing" my True Self |
-
-;<<asAdult>>
+;<<question>>
 
 ***:===As Children
 ====Necessary ==> Hypervigilance
@@ -83,61 +86,78 @@ The Tactic (rescuer role) became a "Habit" to:
 |_ our parent’s tone of voice, body language and gestures
 |_ others comments, emotions, actions and reactions
 |_ our surroundings and environment for threats
+;<<asChild>>
 
-<back:MistyRose>**TODO: Search BRB for "Hypervigilance" examples (list)**</back>
-
+****: ???
+**WHY do ACA's dread emotional pain??**
 Adult children dread emotional pain because we rarely
 had anyone to stand with us as we experienced anguish
 as children. Growing up in a dysfunctional home,
 we often endured unspeakable suffering in silence.
 We became hypervigilant to emotional pain and sought
 addiction, work, sex, or drugs to stay “pain” free.
-
 BRB (p. 236). ACA WSO INC.. Kindle Edition.
+;<<question>>
 
-;<<asChild>>
-****:===As Adult
-<back:MistyRose>**As an Adult HOW do I "Hypervigilantly survey"?**</back>
+****: ???
+TODO: Search BRB for "Hypervigilance" examples (list)
+;<<question>>
+
+
+****:===???
+**As an Adult HOW do I "Hypervigilantly survey"?**
 * <make a list>
-;<<asAdult>>
+;<<question>>
+
+' ---------Hypervigilance Definition-----------------
 
 ***:===As Children
-==== Definition:  "Hypervigilance"
+* As children we were completely busy
+looking outward to survive (**Hypervigilance**)
+;<<asChild>>
+
+****:===\t\t\tDefinition:  "Hypervigilance"
+
 * Can be a <w>symptom</w> of PTSD
-* Unusually sensitive to:
-| the environment | the people around them |
+__Unusually sensitive to__:
+| the environment |
+| the people around them |
 
-* The subconscious is constantly anticipating danger.
-* As a result, their senses are on high alert
-  ready to spot and respond to danger such as:
-| a physical danger | repeat of a traumatic event|
-| feel as though there is always\n a threat around the corner | something wrong in a relationship |;<<asChild>>
+* The subconscious is __constantly anticipating__ **danger**
+* __As a result__, their senses are on high alert
+  ready to spot and respond to danger __such as__:
+| a physical danger|
+| repeat of a traumatic event|
+| feel as though there is always\n a threat around the corner |
+| something wrong in a relationship |;<<asChild>>
 
 
-****_ **Symptoms**
-***** "Physical"
-******:
+*****_ **Symptoms**
+****** "Physical"
+*******:
 | dilated pupils      | breathing very quickly |
 | seeming restless ** | sweating **            |
 | rapid heart beat ** |                        |;
-***** "Behavioral"
-******:
+
+****** "Behavioral"
+*******:
 | keep checking their surroundings                            | find it hard to focus on conversations          |
 | trouble getting to sleep or staying asleep                  | find crowded or noisy environments overwhelming |
 | look closely at people to see if they are\n holding weapons | be easily startled and jump or scream at things\n they hear or see suddenly |
 | overanalyze situations and believe them to\n be worse than they are| be overly sensitive to people’s tone\n or expressions, taking them personally |
 | overreact to things happening around them in\n a way that may seem hostile | overestimate the chances of a bad thing\n happening to them physically or in their relationships |;
-***** "Complications\n (Long-term)"
-******:
+
+****** "Complications\n (Long-term)"
+*******:
 | difficulty in relationships     | physical and mental exhaustion |
 | problems in the workplace       | obsessive behavior patterns    |
 | avoidance of social situations  |                                |;
 
-****_ **Causes**
-***** "Anxiety"
-***** "PTSD"
-******:
-<back:MistyRose>What are my PTSD triggering events?</back>
+*****_ **Causes**
+****** "Anxiety"
+****** "PTSD"
+*******:
+**Yellow>What are my PTSD triggering events?**
 * expressed in our hypervigilance of our surroundings
   or our acute monitoring of comments or actions of
   others. This behavior is a carry-over from growing
@@ -147,10 +167,10 @@ As and Adult:
 * Im constantly monitoring my thoughts and actions..to
   make the right decision, say right thing, to avoid
   or not draw threats towards me
-;<<asAdult>>
+;<<question>>
 
-***** "Triggers"
-******:
+****** "Triggers"
+*******:
 | feeling claustrophobic **       | criticism or embarrassment **        |
 | crowded environments  **        | competing demands or expectations ** |
 | uncertain situations **         | chaotic behavior by others **        |
@@ -158,16 +178,12 @@ As and Adult:
 | arguments and shouting **       | feeling or anticipating pain **      |
 | being emotionally distressed ** |                                      |;
 
-****_ **Detection**
-*****:
-table of trigger => feeeling -> mental & physical
-;<<asAdult>>
+*****_ **Detection**
+******:???
+**TODO:**
+- table of trigger => feeeling -> mental & physical
+;<<question>>
 
-
-***:===As Children
-* As children we were completely busy
-looking outward to survive
-;<<asChild>>
 
 '-------The Other Laundry List-------
 
@@ -183,22 +199,24 @@ our <u>deficiencies</u> and <u>shortcomings</u>.
 ****:
 * "The sheer weight of ALL that responsibility becomes too much
 to bear, we then go in the opposite direction"
+; <<asAdult>>
+*****: ???
 * TODO :
 ** List out what resposibilites become too much to bear?
 ** What does this look like?
-; <<asAdult>>
+;<<question>>
 
 ***_ Become engrossed in our false self
-**** What is our False Self? <<asAdult>>
+**** What is our False Self? <<question>>
 ****_ What is important to others is NO LONGER matters to us
-***** Why doesnt it not matter to us? <<asAdult>>
+***** Why doesnt it not matter to us? <<question>>
 ****_ we strategize, if people just took care of themselves everybody would be okay
 ***** TODO : List examples of this as an Adult today <<asAdult>>
 
 ***_ Increase level of false self attention
 ****_ Worsens over time
 ****_ Alienates those around us
-***** How in this mind set do we alienate others? <<asAdult>>
+***** How in this mind set do we alienate others? <<question>>
 *****:
 The experience of being powerless to control the events
 that damage us as children leaves us with a deep feeling
@@ -210,19 +228,14 @@ BRB(p. 371). ACA WSO INC.. Kindle Edition.
 ***_ Armed with false self-importance
 ****_ We act out on our loved ones, co-workers and friends
 ****_ The deficiencies and shortcomings we suffered from our childhood
-***** What are those deficiencies and shortcomings we suffered?  <<asAdult>>
-**** What does self-importance look like?  <<asAdult>>
+***** What are those deficiencies and shortcomings we suffered?  <<question>>
+**** What does self-importance look like?  <<question>>
 
 ***_ Our false self-centeredness
 ****_ keeps us blind to our deficiencies and shortcomings
-***** What are mydeficiencies and shortcomings? <<asAdult>>
+***** What are mydeficiencies and shortcomings? <<question>>
 ****_ when standing too close to our defensive false-self
-***** How is my false-self actig defensively? <<asAdult>>
-
-
-
-
-
+***** How is my false-self actig defensively? <<question>>
 
 
 
@@ -238,6 +251,38 @@ left side
  looking at <u>our</u> own <u>shortcomings</u>"
 ;
 
+***_ The reward
+****:
+Relief from the __burden__ of
+taking care of __everyone__
+;<<asAdult>>
+
+****:
+Realization of our __True Self__
+;<<asAdult>>
+
+*****: ???
+What is the True Self?
+;<<question>>
+
+***_ Magical Powers
+****:
+No longer bound by our "Magical Powers"
+a.k.a "control and manipulation" we Can
+enjoy those in our life
+;<<asAdult>>
+
+*****: ???
+What are my __"Magical Powers"__?
+;<<question>>
+
+***_ Restoring Energy and Power
+****:
+Allowing others to bear the brunt __of their own decisions__
+and not attempting to __control__ their actions restores
+a great deal of __energy and power__
+;<<asAdult>>
+
 '-------The Flip Side of The Other Laundry List-------
 **: <&circle-check>
 ===The Flip Side of The Other Laundry List
@@ -250,6 +295,29 @@ left side
 ** <u>inferiority</u> and
 ** <u>grandiosity</u>
 ;
+
+***_ Clear of Enabling Behavior
+****:
+Using the ACA Steps, to better understand the traits
+we are clearer where our behavior is enabling
+;<<asAdult>>
+
+***_ Higher Powers Grace
+****:
+With our Higher Powers grace we:
+# Are able to __abstain without__ any sense of __grandiosity__ or __judgement__
+# Have full knowledge only God has the ablility to grant someone
+    the __courage__ to __change themselves__
+
+;<<asAdult>>
+
+***_ Able to be present
+****:
+# Left to face our inner hurt and memories, the torrent of
+unexpressed emotions eventually subsides
+# Allowing us to be present for our Inner Child and others
+
+;<<asAdult>>
 
 '==========TITLE============
 caption figure 1
