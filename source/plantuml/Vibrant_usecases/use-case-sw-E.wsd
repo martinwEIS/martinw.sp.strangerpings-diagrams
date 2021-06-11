@@ -1,0 +1,154 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+
+!include <material/account_circle.puml>
+' skinparam maxMessageSize 60
+skinparam roundcorner 30
+hide header
+hide stereotype
+' skinparam linetype polyline
+' skinparam linetype ortho
+' left to right direction
+skinparam note {
+  borderColor black
+}
+
+skinparam rectangle {
+  roundCorner 70
+  Shadowing false
+  borderColor<<diagbox>> white
+  borderColor<<rescuer>> black
+  BackgroundColor<<peerSup>> lightgrey
+  fontcolor<<peerSup>> black
+  BackgroundColor<<user>> application
+  fontcolor<<user>> navy
+  fontStyle<<user>> segoeui
+}
+
+skinparam usecase {
+ BackgroundColor<<csom>> lightgrey
+ borderColor<<csom>> royalblue
+
+}
+
+skinparam ranksep 10
+skinparam nodesep 100
+title Use Case - E
+
+' PARTICIPANTS
+' actor :User: as user #RoyalBlue;line:black;line.bold;text:black
+
+' 'GIVEN + WHEN + THEN
+'  note right of user #LightGray
+'    <b>GIVEN</b> a peer supporter may need to
+'    connect a member to a Crisis Counselor
+
+'    <b>WHEN</b> a member has expressed a
+'    plan to do harm to themselves or others
+
+'    <b>THEN</b> a peer supporter will provide the member
+'    a URL link to CSOM which will connect the member
+'    directly to a Crisis Counselor.
+'  end note
+
+' actor/ :Peer Supporter: as ps #DarkGray;line:black;line.bold;text:black
+'WORKFLOW
+
+rectangle "Facebook Group\nCommunication Flow" as fbcommflow {
+
+  actor :User: as user #RoyalBlue;line:black;line.bold;text:black
+
+'GIVEN + WHEN + THEN
+ note top of user #LightGray
+   <b>GIVEN</b> a peer supporter may need to
+   connect a member to a Crisis Counselor
+
+   <b>WHEN</b> a member has expressed a
+   plan to do harm to themselves or others
+
+   <b>THEN</b> a peer supporter will provide the member
+   a URL link to CSOM which will connect the member
+   directly to a Crisis Counselor.
+ end note
+
+
+  actor/ :Peer Supporter: as ps #DarkGray;line:black;line.bold;text:black
+
+  rectangle "Group Wall Post" as wallPost {
+    rectangle " " as userdiagbox <<diagbox>> {
+      rectangle userdiag1 <<user>> as "
+          <color:RoyalBlue><size:0><$ma_account_circle*.75></size></color>
+          User has suicidal thoughts
+
+          <size:25><&arrow-circle-right></size>
+          "
+
+      rectangle userdiag2 <<user>> as "
+          <color:RoyalBlue><size:0><$ma_account_circle*.75></size></color>
+          Nahh, I dont think so...I just want
+          to be with mom...its would be so much
+          nicer...hmmm
+
+          <size:25><&arrow-circle-right></size>
+          "
+    }
+
+    rectangle " " as psdiagbox <<diagbox>> {
+      rectangle psdiag1 <<peerSup>> as "
+          <color:black><size:25><$ma_account_circle*.75></size></color>
+
+          Hey man, you gut this. Hang in there!
+
+          <size:25><&arrow-circle-left></size>
+          "
+      rectangle psdiag2 <<peerSup>> as "
+          <color:black><size:25><$ma_account_circle*.75></size></color>
+
+          Here is a direct URL link to a Crisis Counselor
+          if you want to talk :)
+
+          <size:25><&arrow-circle-left></size>
+          "
+    }
+
+    ' usecase "Facebook Messenger" as fm
+  }
+
+  ' DIALOG STRUCTURE
+
+  userdiag1 --[hidden]down-> userdiag2
+  psdiag1 --[hidden]down-> psdiag2
+
+  ' DIALOG FLOW
+  userdiag1 -down-> psdiag1 #line:lightgrey
+  psdiag1 -down--> userdiag2 #line:lightgrey
+  userdiag2 -down-> psdiag2 #line:lightgrey
+}
+
+rectangle "Crisis Counselor\nCommunication Flow" as criscommflow {
+  actor/ :Crisis Counselor: as cc #DarkGray;line:black;line.bold;text:black
+
+  rectangle "Message App" as msgAppCsom {
+    ' usecase/ "Facebook \nMessenger (CSOM)" as csom
+    usecase/ "Facebook \nMessenger (CSOM)" as csom <<csom>>
+  }
+}
+
+'INITIAL CONTACT
+user -[#RoyalBlue,thickness=4]-> userdiag1
+
+'AVAILABLE
+ps -[#DarkGray,thickness=4]up-> psdiag1
+
+'VERIFY CRISIS COUNSELOR AVAILABLE
+' ps -up-> csom #red;line.bold;line:red;text:red : 1.3\n PS verify Crisis\n Counselor available
+' csom --> cc #red;line.bold;line:red;text:red
+
+'USER CONTACTS CRISIS COUNSELOR
+user -[#RoyalBlue,dashed,thickness=3]-> csom :User initiates\nCSOM request\nfor assistance
+csom -[#RoyalBlue,dashed,thickness=3]-> cc  :User connects\nwith Crisis Counselor
+
+' criscommflow --[hidden]-> fbcommflow
+fbcommflow -[hidden]up-> criscommflow
+@enduml

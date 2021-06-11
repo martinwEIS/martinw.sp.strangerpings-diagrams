@@ -1,0 +1,322 @@
+
+'Component Diagram Acceptance Criteria :
+'https://confluence.epnet.com/x/QJXHE
+
+@startuml
+
+skinparam componentStyle rectangle
+skinparam fontsize 10
+skinparam StereotypeFontSize 10
+skinparam roundCorner 20
+
+skinparam rectangle {
+    roundCorner<<rounded>> 25
+    fontsize 12
+    FontStyle normal
+    StereotypeFontSize 10
+    StereotypeFontStyle plain
+}
+
+skinparam nodeStereotypeFontSize<<logstash>> 10
+
+skinparam node {
+    BackgroundColor #aliceblue
+    BorderColor blue
+    fontsize 10
+    StereotypeFontSize 10
+    StereotypeFontColor red
+    StereotypeFontStyle italic
+}
+
+skinparam queue {
+    BackgroundColor #yellow
+    BorderColor blue
+    fontsize 10
+}
+
+skinparam file {
+    BackgroundColor #yellow
+    BorderColor blue
+    fontsize 10
+}
+
+title ELK AWS LZ (Current Design)
+
+rectangle "eis-lz-shared-devqa" <<Account>> as acctSharedDevQa {
+
+    rectangle "shared-devqa" <<VPC>> as vpcSHQ {
+
+        node "EC2" <<Service>> as ec2SHQ {
+
+            component "Filebeat" as fbSHQ {
+
+                file "filebeat.yaml" as fbyamlSHQ
+            }
+        }
+
+        interface "Data Flow" as dataEntrySHQ
+        dataEntrySHQ -down-> fbyamlSHQ
+
+        rectangle "\tELK\n\tNOT\nIMPLEMENTED" as noElkSHQ
+        fbyamlSHQ --> noElkSHQ
+    }
+
+    interface "Entry\nPoint" as dataEntrySharedDevQa
+    dataEntrySharedDevQa --> dataEntrySHQ
+}
+
+rectangle "eis-lz-shared" <<Account>> as acctShared {
+
+    rectangle "shared" <<VPC>>  as vpcSH {
+
+        node "EC2" <<Service>>  as ec2SH {
+
+            component "Filebeat" as fbSH {
+
+                file "filebeat.yaml" as fbyamlSH
+            }
+        }
+
+        interface "Data Flow" as dataEntrySH
+        dataEntrySH -down-> fbyamlSH
+
+        rectangle "\tELK\n\tNOT\nIMPLEMENTED" as noElkSH
+        fbyamlSH --> noElkSH
+    }
+
+    interface "Entry\nPoint" as dataEntryShared
+    dataEntryShared --> dataEntrySH
+}
+
+rectangle "eis-lz-ehost-devqa" <<Account>> as acctEhostDevQa {
+
+    rectangle "ehost-devqa" <<VPC>>  as vpcQ {
+
+        node "EC2" <<Service>> as ec2Q {
+
+            component "Filebeat" as fbQ {
+
+                file "filebeat.yaml" as fbyamlQ
+            }
+        }
+
+        rectangle " " <<Logstash>> as lsQ  {
+
+            component lsNlbQ as "
+            \tElastic Load Balancer
+            --
+            <b>logstash.ehost-devqa.eislz.com</b>
+            "
+
+            node "C4.xlarge" <<Logstash>> as ls2Q {
+
+                queue "Persistent\n  Queue" as pq2Q
+            }
+
+            node "C4.xlarge" <<Logstash>> as ls1Q {
+
+                queue "Persistent\n  Queue" as pq1Q
+            }
+        }
+
+        rectangle "<b>Domain : es-centralizedlogging</b>" <<Elasticsearch Cluster (Managed)>> as escQ {
+
+            component kibanaQ as "
+            \t\tKibana UI
+            --
+            <b>http:\\elk.ehost-devqa.eislz.com</b>
+            "
+
+            component elasticEndpointQ as "
+            Elasticsearch Endpoint
+            --
+            <b>elk.ehost-devqa.eislz.com</b>
+            "
+
+            rectangle "Master Nodes" as masterQ {
+                node "C5.xlarge" <<Master>>  as mn3Q
+                node "C5.xlarge" <<Master>>  as mn2Q
+                node "C5.xlarge" <<Master>>  as mn1Q
+            }
+
+            rectangle "Data Nodes" as dataQ {
+                database "C5.xlarge" <<Data>> as dn1Q
+                database "C5.xlarge" <<Data>> as dn2Q
+                database "C5.xlarge" <<Data>> as dn3Q
+                database "C5.xlarge" <<Data>> as dn4Q
+                database "C5.xlarge" <<Data>> as dn5Q
+                database "C5.xlarge" <<Data>> as dn6Q
+            }
+
+            interface "  Kibana\nEntry Point " as kibanaEntryQ
+            kibanaEntryQ -left-> kibanaQ
+
+            kibanaQ -left-> elasticEndpointQ
+
+            elasticEndpointQ --> mn3Q
+            elasticEndpointQ --> mn2Q
+            elasticEndpointQ --> mn1Q
+
+            dataQ --> dn6Q
+            dataQ --> dn5Q
+            dataQ --> dn4Q
+            dataQ --> dn3Q
+            dataQ --> dn2Q
+            dataQ --> dn1Q
+
+            mn3Q --> dataQ
+            mn2Q --> dataQ
+            mn1Q --> dataQ
+        }
+
+        fbyamlQ -down-> lsNlbQ
+        lsNlbQ --> pq1Q
+        lsNlbQ --> pq2Q
+        pq1Q --> elasticEndpointQ
+        pq2Q --> elasticEndpointQ
+
+        interface " " as dataEntryQ
+        dataEntryQ -down-> fbyamlQ
+    }
+
+    interface "Entry\nPoint" as dataEntryEhostDevQa
+    dataEntryEhostDevQa --> dataEntryQ
+}
+
+rectangle "eis-lz-ehost-integration" <<Account>> as acctEhostInt {
+
+    rectangle "ehost-int" <<VPC>>  as vpcI {
+
+        node "EC2" <<Service>> as ec2I {
+
+            component "Filebeat" as fbI {
+
+                file "filebeat.yaml" as fbyamlI
+            }
+        }
+
+        interface "Data Flow" as dataEntryI
+        dataEntryI -down-> fbyamlI
+
+        rectangle "\tELK\n\tNOT\nIMPLEMENTED" as noElkI
+        fbyamlI --> noElkI
+    }
+
+    interface "Entry\nPoint" as dataEntryEhostInt
+    dataEntryEhostInt --> dataEntryI
+}
+
+rectangle "eis-lz-ehost-live" <<Account>> as acctEhostLive {
+
+    rectangle "ehost-live-sigma" <<VPC>>  as vpcSi {
+
+        node "EC2" <<Service>> as ec2Si {
+
+            component "Filebeat" as fbSi {
+
+                file "filebeat.yaml" as fbyamlSi
+            }
+        }
+
+        interface " " as dataEntrySi
+        dataEntrySi -down-> fbyamlSi
+    }
+
+    rectangle "ehost-live-pi" <<VPC>>  as vpcPi {
+
+        node "EC2" <<Service>> as ec2Pi {
+
+            component "Filebeat" as fbPi {
+
+                file "filebeat.yaml" as fbyamlPi
+            }
+        }
+
+        rectangle " " <<Logstash>> as lsPi {
+
+            component lsNlbPi as "
+            \tElastic Load Balancer
+            --
+            <b>logstash.ehost-live.eislz.com</b>
+            "
+
+            node "C4.xlarge" <<Logstash>> as ls1Pi {
+
+                queue "Persistent\n  Queue" as pq1Pi
+            }
+
+            node "C4.xlarge" <<Logstash>> as ls2Pi {
+
+                queue "Persistent\n  Queue" as pq2Pi
+            }
+        }
+
+        rectangle "<b>Domain : es-centralizedlogging</b>" <<Elasticsearch Cluster (Managed)>> as escPii {
+
+            component kibanaPi as "
+            \t\tKibana UI
+            --
+            <b>http:\\elk.ehost-live.eislz.com</b>
+            "
+
+            component elasticEndpointPi as "
+            Elasticsearch Endpoint
+            --
+            <b>elk.ehost-live.eislz.com</b>
+            "
+
+            rectangle "Master Nodes" as masterPi {
+
+                node "C5.xlarge" <<Master>>  as mn3Pi
+                node "C5.xlarge" <<Master>>  as mn2Pi
+                node "C5.xlarge" <<Master>>  as mn1Pi
+            }
+
+            rectangle "Data Nodes" as dataPi {
+
+                database "C5.xlarge" <<Data>> as dn1Pi
+                database "C5.xlarge" <<Data>> as dn2Pi
+                database "C5.xlarge" <<Data>> as dn3Pi
+                database "C5.xlarge" <<Data>> as dn4Pi
+                database "C5.xlarge" <<Data>> as dn5Pi
+                database "C5.xlarge" <<Data>> as dn6Pi
+            }
+
+            interface "  Kibana\nEntry Point " as kibanaEntryPi
+            kibanaEntryPi -left-> kibanaPi
+
+            kibanaPi -left-> elasticEndpointPi
+
+            elasticEndpointPi --> mn3Pi
+            elasticEndpointPi --> mn2Pi
+            elasticEndpointPi --> mn1Pi
+
+            dataPi --> dn6Pi
+            dataPi --> dn5Pi
+            dataPi --> dn4Pi
+            dataPi --> dn3Pi
+            dataPi --> dn2Pi
+            dataPi --> dn1Pi
+
+            mn3Pi --> dataPi
+            mn2Pi --> dataPi
+            mn1Pi --> dataPi
+        }
+
+        fbyamlPi -down-> lsNlbPi
+        fbyamlSi -down-> lsNlbPi
+        lsNlbPi --> pq1Pi
+        lsNlbPi --> pq2Pi
+        pq1Pi --> elasticEndpointPi
+        pq2Pi --> elasticEndpointPi
+
+        interface " " as dataEntryPi
+        dataEntryPi -down-> fbyamlPi
+    }
+
+    interface "Entry\nPoint" as dataEntryEhostLive
+    dataEntryEhostLive --> dataEntryPi
+    dataEntryEhostLive --> dataEntrySi
+}
+
+@enduml
