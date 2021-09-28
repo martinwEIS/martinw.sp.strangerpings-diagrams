@@ -1,0 +1,79 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+
+!include <material/account_circle.puml>
+skinparam roundcorner 30
+
+hide header
+hide stereotype
+
+skinparam actor {
+  BackgroundColor<<actormember>> royalblue
+  BackgroundColor<<actorcc>> palegreen
+  BackgroundColor<<actorps>> darkgrey
+  borderColor black
+  FontColor black
+  FontStyle bold
+}
+
+skinparam arrow {
+  ArrowColor<<actorps>> darkgrey
+}
+
+skinparam note {
+  borderColor black
+}
+
+skinparam rectangle {
+  roundCorner 70
+  Shadowing false
+  borderColor<<diagbox>> white
+  borderColor<<rescuer>> black
+  BackgroundColor<<peerSup>> lightgrey
+  fontcolor<<peerSup>> black
+  BackgroundColor<<member>> application
+  fontcolor<<member>> navy
+  fontStyle<<member>> segoeui
+}
+
+skinparam usecase {
+ BackgroundColor<<csom>> lightgrey
+ borderColor<<csom>> royalblue
+}
+
+skinparam ranksep 10
+skinparam nodesep 100
+
+title Use Case - A
+
+' PARTICIPANTS
+actor :Member: as member <<actormember>>
+actor/ :Peer Supporter: as ps <<actorps>>
+
+'GIVEN + WHEN + THEN
+ note left of member #LightGrey
+   <b>GIVEN</b> a peer supporter
+   needs to message a member
+
+   <b>WHEN</b> it is necessary for a
+   peer supporter to address a
+   member privately
+
+   <b>THEN</b> a peer supporter
+   will contact a member
+   via Facebook Messenger
+ end note
+
+'WORKFLOW
+rectangle "Communication\n Flow" as commflow {
+  usecase "Facebook \nMessenger" as fm <<csom>>
+}
+
+'PS AVAILABLE
+ps -[#DarkGray,thickness=2]up-> fm : <b>Initiate</b> \n<b>message</b>
+
+'PS INITIAL CONTACT
+fm -[#DarkGray,thickness=2]up-> member : <b>Member accepts</b>\n <b>message request</b>
+
+@enduml

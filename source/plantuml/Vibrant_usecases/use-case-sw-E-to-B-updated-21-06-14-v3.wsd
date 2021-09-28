@@ -1,0 +1,117 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+
+!include <material/account_circle.puml>
+skinparam roundcorner 30
+
+hide header
+hide stereotype
+
+skinparam actor {
+  BackgroundColor<<actormember>> royalblue
+  BackgroundColor<<actorcc>> palegreen
+  BackgroundColor<<actorps>> darkgrey
+  borderColor black
+  FontColor black
+  FontStyle bold
+}
+
+
+skinparam note {
+  borderColor black
+}
+
+skinparam rectangle {
+  roundCorner 70
+  Shadowing false
+  borderColor<<diagbox>> white
+  BackgroundColor<<peerSup>> lightgrey
+  fontcolor<<peerSup>> black
+  BackgroundColor<<member>> application
+  fontcolor<<member>> navy
+  fontStyle<<member>> segoeui
+}
+
+skinparam usecase {
+ BackgroundColor<<csom>> lightgrey
+ borderColor<<csom>> royalblue
+}
+
+
+skinparam ranksep 10
+skinparam nodesep 100
+
+title Use Case - B
+
+'-------FB: COMM FLOW-------
+rectangle "Facebook Group\nCommunication Flow" as fbcommflow {
+
+  actor :Member: as member <<actormember>>
+
+'-------GIVEN + WHEN + THEN-------
+  note top of member #LightGray
+    <b>GIVEN</b> a peer supporter needs to
+    connect a member to a crisis counselor
+
+    <b>WHEN</b> a member posts a threat to
+    to do self-harm or harm to others
+
+    <b>THEN</b> a peer supporter will post to
+    the member a URL link to CSOM which will
+    connect the member directly to a crisis counselor.
+  end note
+
+'-------FB : WALL POST FLOW-------
+  actor/ :Peer Supporter: as ps <<actorps>>
+
+  rectangle "Group \nWall  Post" as wallPost {
+    rectangle " " as memberdiagbox <<diagbox>> {
+      rectangle memberdiag1 <<member>> as "
+          <color:RoyalBlue><size:0><$ma_account_circle*.75></size></color>
+          Member posts a threat to do
+          self-harm or harm to others
+
+          "
+    }
+
+    rectangle " " as psdiagbox <<diagbox>> {
+      rectangle psdiag1 <<peerSup>> as "
+          <color:black><size:25><$ma_account_circle*.75></size></color>
+          Peer supporter responds by
+          posting a URL link to CSOM
+          which will connect the member
+          directly to a crisis counselor
+
+          "
+    }
+  }
+
+'-------DIAGLOG FLOW-------
+  psdiag1 -[#DarkGray,thickness=2]up-> memberdiag1
+}
+
+'-------CRISIS COUNSELOR COMM FLOW-------
+rectangle "Crisis Counselor\nCommunication Flow" as criscommflow {
+
+  actor/ :Crisis Counselor: as cc <<actorcc>>
+
+  rectangle "Message App" as msgAppCsom {
+
+    usecase/ "Facebook \nMessenger (CSOM)" as csom <<csom>>
+  }
+}
+
+'-------member POST-------
+member -[#RoyalBlue,thickness=2]-> memberdiag1
+
+'-------PEER SUPPORTER RESPONSE-------
+ps -[#DarkGray,thickness=2]up-> psdiag1
+
+'-------member TO CRISIS COUNSELOR FLOW -------
+member -[#RoyalBlue,dashed,thickness=2]-> csom
+
+csom -[#RoyalBlue,dashed,thickness=2]-> cc  :<size:15>**Member**</size>\n <size:15>**connects**</size> \n<size:15>**with a**</size> \n<size:15>**crisis counselor**</size>
+
+fbcommflow -[hidden]up-> criscommflow
+@enduml

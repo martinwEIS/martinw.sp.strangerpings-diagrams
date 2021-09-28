@@ -75,11 +75,12 @@ rectangle "Facebook Group\nCommunication Flow" as fbcommflow {
 
   actor/ :Peer Supporter: as ps #DarkGray;line:black;line.bold;text:black
 
-  rectangle "Group Wall Post" as wallPost {
+  rectangle "Group \nWall Post" as wallPost {
     rectangle " " as userdiagbox <<diagbox>> {
       rectangle userdiag1 <<user>> as "
           <color:RoyalBlue><size:0><$ma_account_circle*.75></size></color>
-          User has suicidal thoughts
+          User has made threats of selfharm or
+          harm towards others.
 
           <size:25><&arrow-circle-right></size>
           "
@@ -98,7 +99,9 @@ rectangle "Facebook Group\nCommunication Flow" as fbcommflow {
       rectangle psdiag1 <<peerSup>> as "
           <color:black><size:25><$ma_account_circle*.75></size></color>
 
-          Hey man, you gut this. Hang in there!
+          Peer Supporter triages user emotional distress
+          and responds by providing a  direct URL link
+           to a Crisis Counselor
 
           <size:25><&arrow-circle-left></size>
           "
@@ -127,7 +130,7 @@ rectangle "Facebook Group\nCommunication Flow" as fbcommflow {
 }
 
 rectangle "Crisis Counselor\nCommunication Flow" as criscommflow {
-  actor/ :Crisis Counselor: as cc #DarkGray;line:black;line.bold;text:black
+  actor/ :Crisis Counselor: as cc #PaleGreen;line:black;line.bold;text:black
 
   rectangle "Message App" as msgAppCsom {
     ' usecase/ "Facebook \nMessenger (CSOM)" as csom
@@ -146,8 +149,8 @@ ps -[#DarkGray,thickness=4]up-> psdiag1
 ' csom --> cc #red;line.bold;line:red;text:red
 
 'USER CONTACTS CRISIS COUNSELOR
-user -[#RoyalBlue,dashed,thickness=3]-> csom :User initiates\nCSOM request\nfor assistance
-csom -[#RoyalBlue,dashed,thickness=3]-> cc  :User connects\nwith Crisis Counselor
+user -[#RoyalBlue,dashed,thickness=3]-> csom :<size:17>**User initiates CSOM request**</size> \n <size:17>**to a Crisis Counsle using link**</size> \n <size:17>**provided by Peer Supporter**</size>
+csom -[#RoyalBlue,dashed,thickness=3]-> cc  :<size:17>**User connects with**</size> \n<size:17>**a Crisis Counselor**</size>
 
 ' criscommflow --[hidden]-> fbcommflow
 fbcommflow -[hidden]up-> criscommflow

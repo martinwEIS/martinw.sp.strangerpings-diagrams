@@ -1,0 +1,103 @@
+'Diagram UI : https://www.planttext.com/
+'Coding Documentation : https://plantuml.com/use-case-diagram#d50d8f9219a41435
+@startuml
+
+!include <material/account_circle.puml>
+skinparam roundcorner 30
+
+hide header
+hide stereotype
+
+skinparam note {
+  borderColor black
+}
+
+skinparam rectangle {
+  roundCorner 70
+  Shadowing false
+  borderColor<<diagbox>> white
+  borderColor<<rescuer>> black
+  BackgroundColor<<peerSup>> lightgrey
+  fontcolor<<peerSup>> black
+  BackgroundColor<<user>> application
+  fontcolor<<user>> navy
+  fontStyle<<user>> segoeui
+}
+
+skinparam usecase {
+ BackgroundColor<<csom>> lightgrey
+ borderColor<<csom>> royalblue
+}
+
+
+skinparam ranksep 10
+skinparam nodesep 100
+
+title Use Case - E
+
+'-------FB: COMM FLOW-------
+rectangle "Facebook Group\nCommunication Flow" as fbcommflow {
+
+  actor :User: as user #RoyalBlue;line:black;line.bold;text:black
+
+'-------GIVEN + WHEN + THEN-------
+  note top of user #LightGray
+    <b>GIVEN</b> a peer supporter may need to
+    connect a member to a Crisis Counselor
+
+    <b>WHEN</b> a member has expressed a
+    plan to do harm to themselves or others
+
+    <b>THEN</b> a peer supporter will provide the member
+    a URL link to CSOM which will connect the member
+    directly to a Crisis Counselor.
+  end note
+
+'-------FB : WALL POST FLOW-------
+  actor/ :Peer Supporter: as ps #DarkGray;line:black;line.bold;text:black
+
+  rectangle "Group \nWall Post" as wallPost {
+    rectangle " " as userdiagbox <<diagbox>> {
+      rectangle userdiag1 <<user>> as "
+          <color:RoyalBlue><size:0><$ma_account_circle*.75></size></color>
+          User has made threats of selfharm or
+          harm towards others."
+    }
+
+    rectangle " " as psdiagbox <<diagbox>> {
+      rectangle psdiag1 <<peerSup>> as "
+          <color:black><size:25><$ma_account_circle*.75></size></color>
+          Peer Supporter triages user emotional distress
+          and responds by providing a  direct URL link
+           to a Crisis Counselor."
+    }
+  }
+
+'-------DIAGLOG FLOW-------
+  psdiag1 -[#DarkGray,thickness=4]up-> userdiag1
+}
+
+'-------CRISIS COUNSELOR COMM FLOW-------
+rectangle "Crisis Counselor\nCommunication Flow" as criscommflow {
+
+  actor/ :Crisis Counselor: as cc #PaleGreen;line:black;line.bold;text:black
+
+  rectangle "Message App" as msgAppCsom {
+
+    usecase/ "Facebook \nMessenger (CSOM)" as csom <<csom>>
+  }
+}
+
+'-------USER POST-------
+user -[#RoyalBlue,thickness=4]-> userdiag1
+
+'-------PEER SUPPORTER RESPONSE-------
+ps -[#DarkGray,thickness=4]up-> psdiag1
+
+'-------USER TO CRISIS COUNSELOR FLOW -------
+user -[#RoyalBlue,dashed,thickness=3]-> csom :<size:17>**User initiates CSOM request**</size> \n <size:17>**to a Crisis Counsle using link**</size> \n <size:17>**provided by Peer Supporter**</size>
+
+csom -[#RoyalBlue,dashed,thickness=3]-> cc  :<size:17>**User connects**</size> \n<size:17>**with a**</size> \n<size:17>**Crisis Counselor**</size>
+
+fbcommflow -[hidden]up-> criscommflow
+@enduml
